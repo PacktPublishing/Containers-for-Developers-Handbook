@@ -1,4 +1,3 @@
-cat src/webserver.go
 package main
 
 import (
