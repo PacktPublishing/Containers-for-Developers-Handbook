@@ -1,0 +1,19 @@
+version: "3.2"
+
+services:
+  red:
+    image: frjaraur/colors:1.6
+    environment:
+      - COLOR: "red" 
+    deploy:
+      replicas: 1
+      labels:
+        com.docker.lb.hosts: red.example.org
+        com.docker.lb.network: red-network
+        com.docker.lb.port: 8080
+    networks:
+      - demo-network
+
+networks:
+  red-network:
+    driver: overlay

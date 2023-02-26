@@ -1,0 +1,47 @@
+version: "3"
+
+services:
+  red:
+    image: frjaraur/hrm-demo-chgcolors:1.0
+    #ports:
+    #  - "8001:3000"
+    environment:
+      - COLOR=red
+    labels:
+      - com.docker.ucp.mesh.http=external_route=http://red.hoplalabs.org,internal_port=3000
+    networks:
+      - colors
+      - ucp-hrm
+
+  green:
+    image: frjaraur/hrm-demo-chgcolors:1.0
+    #ports:
+    #  - "8002:3000"
+    environment:
+      - COLOR=green
+    labels:
+      - com.docker.ucp.mesh.http=external_route=http://green.hoplalabs.org,internal_port=3000
+    networks:
+      - colors
+      - ucp-hrm
+
+  black:
+    image: frjaraur/hrm-demo-chgcolors:1.0
+    #ports:
+    #  - "8003:3000"
+    environment:
+      - COLOR=black
+    labels:
+      - com.docker.ucp.mesh.http=external_route=http://black.hoplalabs.org,internal_port=3000
+    networks:
+      - colors
+      - ucp-hrm
+
+
+networks:
+    colors:
+    ucp-hrm:
+        external: true
+
+
+
