@@ -13,29 +13,29 @@ We could use Docker Engine in Linux directly (container runtime only, following 
 
 This first part of the lab will guide you through the easy process of installing Rancher Desktop by following the steps documented in the following link https://docs.docker.com/get-docker/. Rancher Desktop on windows will fully integrate with WSL2 (Windows Subsystem for Linux). We will use “Ubuntu” WSL distribution for both, Docker Desktop and Rancher Desktop. You just have to be aware that only one of them should be used at time.
 Before starting the Rancher Desktop installation process, ensure Docker Desktop is stopped by clicking on the Windows Toolbard Docker Desktop icon and "Exit" option. This will stop you Docker Desktop instance.
-![Stop Docker Desktop](./images/ch2_lab1.png) 
+![Stop Docker Desktop](./images/ch2_lab1.PNG) 
 Rancher Deskop and Docker Desktop can be installed on your computer at the same time, but only one of them can be running at time.
 
 Let’s continue with Rancher Desktop installation. Download the installer from the following URL https://rancherdesktop.io/.
-![Rancher Desktop URL](./images/ch2_lab2.png) 
+![Rancher Desktop URL](./images/ch2_lab2.PNG) 
 
 Once downloaded, execute the “Rancher.Desktop.Setup.1.7.0.exe” binary, version may be different.
-![Rancher Desktop exe](./images/ch2_lab3.png)
+![Rancher Desktop exe](./images/ch2_lab3.PNG)
 
 You will be asked to choose between install the application for all users or only you. This will define the application path. You can install it for all users.
-![Rancher Desktop users](./images/ch2_lab4.png)
+![Rancher Desktop users](./images/ch2_lab4.PNG)
 
 After clicking “OK” button, installation process will begging uncompressing required files (libraries, binaries, default configurations, ...etc). This could take some time (1-3 minutes) depending on your host’s disk speed and compute resources.
-![Rancher Desktop Installation](./images/ch2_lab5.png)
+![Rancher Desktop Installation](./images/ch2_lab5.PNG)
 
 Once installed, we set "Run Rancher Desktop" and this will run Rancher Desktop.
-![Rancher Desktop Run](./images/ch2_lab6.png)
+![Rancher Desktop Run](./images/ch2_lab6.PNG)
 
 As a final step, we will go to Edit > Preferences and WSL, to check our WSL2 "Ubuntu" environment.
-![Rancher Desktop WSL](./images/ch2_lab7.png)
+![Rancher Desktop WSL](./images/ch2_lab7.PNG)
 
 We can now run a Ubuntu terminal and simply execute __nerdctl info__ to verify that Rancher Desktop works.
-![WSL Terminal](./images/ch2_lab8.png)
+![WSL Terminal](./images/ch2_lab8.PNG)
 
 Rancher Desktop works and we are ready to follow next labs by using our WSL2 “Ubuntu” Linux distribution.
 
