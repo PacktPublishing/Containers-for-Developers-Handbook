@@ -12,50 +12,37 @@ We could use Docker Engine in Linux directly (container runtime only, following 
 ## __Installing Rancher Desktop__
 
 This first part of the lab will guide you through the easy process of installing Rancher Desktop by following the steps documented in the following link https://docs.docker.com/get-docker/. Rancher Desktop on windows will fully integrate with WSL2 (Windows Subsystem for Linux). We will use “Ubuntu” WSL distribution for both, Docker Desktop and Rancher Desktop. You just have to be aware that only one of them should be used at time.
+Before starting the Rancher Desktop installation process, ensure Docker Desktop is stopped by clicking on the Windows Toolbard Docker Desktop icon and "Exit" option. This will stop you Docker Desktop instance.
+![Stop Docker Desktop](./images/ch2_lab1.PNG) 
+Rancher Deskop and Docker Desktop can be installed on your computer at the same time, but only one of them can be running at time.
 
-Let’s continue with Docker Desktop installation. Download the installer from the following URL https://docs.docker.com/get-docker/.
-![Docker URL](./images/ch1_lab4.png) 
-Once downloaded, execute the “Docker Desktop Installer.exe” binary. You will be asked to choose between Hyper-V or WSL2 backend virtualization and we will choose WSL2.
-![Docker Desktop WSL2](./images/ch1_lab5.png)
+Let’s continue with Rancher Desktop installation. Download the installer from the following URL https://rancherdesktop.io/.
+![Rancher Desktop URL](./images/ch2_lab2.PNG) 
+
+Once downloaded, execute the “Rancher.Desktop.Setup.1.7.0.exe” binary, version may be different.
+![Rancher Desktop exe](./images/ch2_lab3.PNG)
+
+You will be asked to choose between install the application for all users or only you. This will define the application path. You can install it for all users.
+![Rancher Desktop users](./images/ch2_lab4.PNG)
 
 After clicking “OK” button, installation process will begging uncompressing required files (libraries, binaries, default configurations, ...etc). This could take some time (1-3 minutes) depending on your host’s disk speed and compute resources.
-![Docker Desktop Installation](./images/ch1_lab5.png)
+![Rancher Desktop Installation](./images/ch2_lab5.PNG)
 
-As final step, we will be asked to logout and login again because our user was added to new system groups (docker) to enable access to remote docker daemon via operating system pipes (similar to Unix sockets).
-![Docker Desktop Installed](./images/ch1_lab6.png)
+Once installed, we set "Run Rancher Desktop" and this will run Rancher Desktop.
+![Rancher Desktop Run](./images/ch2_lab6.PNG)
 
-Once we login, we can execute Docker Desktop using the newly added application icon. We can enable Docker Desktop execution on start and this could be very useful for you but it may slow down your computer if you are short of resources. I recommend start Docker Desktop only when we are going to use it.
-We accept redacted Docker Subscription license terms and Docker Desktop will start. This may take a minute.
-![Docker Desktop Starting](./images/ch1_lab7.png)
+As a final step, we will go to Edit > Preferences and WSL, to check our WSL2 "Ubuntu" environment.
+![Rancher Desktop WSL](./images/ch2_lab7.PNG)
 
-You can skip the quick guide that will appear when Docker Desktop is running, because we will learn more in next chapters, deep diving in container images building and containers execution. 
-We will get following screen, showing us that Docker Desktop is ready.
-![Docker Desktop Started](./images/ch1_lab8.png)
+We can now run a Ubuntu terminal and simply execute __nerdctl info__ to verify that Rancher Desktop works.
+![WSL Terminal](./images/ch2_lab8.PNG)
 
-But we will need to enable WSL2 integration with our favorite Linux distribution.
-![Docker Desktop WSL2 Integration](./images/ch1_lab9.png)
-
-After this step, we are finally ready to work with Docker Desktop. We will open a terminal using our “Ubuntu” distribution and execute “docker” and after that, “docker info”.
-![Docker Desktop WSL2 Terminal](./images/ch1_lab10.png)
-
-As you can see, we have a fully functional Docker client command-line associated with Docker Desktop WSL2 server.
-
-We will end this lab executing an Alpine container (small Linux distribution), reviewing its process tree and the list of its root file system.
-![Docker Desktop WSL2 Docker Info](./images/ch1_lab11.png)
-
-This container execution left changes in Docker Desktop; we can review the current images present in our container runtime.
- ![Docker Desktop Alpine Image](./images/ch1_lab13.png)
-
-And the container, already dead because we exited by simple executing “exit” inside its shell.
-![Docker Desktop Alpine Container](./images/ch1_lab13.png)
-
-Docker Desktop works and we are ready to follow next labs by using our WSL2 “Ubuntu” Linux distribution.
-
+Rancher Desktop works and we are ready to follow next labs by using our WSL2 “Ubuntu” Linux distribution.
 
 ---
-The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use either Docker Desktop or any other container runtime. We will use different tools such as Podman, Nerdctl to show you some of the possibilities you have at hand; although some of the features required for specific labs may be only available on a specific tool (or it has a more friendly interface). In these cases, we will ask you to use a specific command-line interface.
-First step for all labs would always be downloading the most updated version of this book’s Github repository in https://github.com/frjaraur/Docker-for-Developers-Handbook.git. To do this, simply execute git clone https://github.com/frjaraur/Docker-for-Developers-Handbook.git to download all its content. If you already downloaded before, ensure you have the newest version by executing git pull inside its directory.
-We will start this section with a simple lab about using caching to speed up the building process. All commands presented in these labs will be executed inside Docker-for-Developers-Handbook/Chapter2 directory.
+The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use either Rancher Desktop, Docker Desktop or any other container runtime. We will use different tools such as Podman, Nerdctl to show you some of the possibilities you have at hand; although some of the features required for specific labs may be only available on a specific tool (or it has a more friendly interface). In these cases, we will ask you to use a specific command-line interface.
+First step for all labs would always be downloading the most updated version of this book’s Github repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook. To do this, simply execute __git clone https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git__ to download all its content. If you already downloaded before, ensure you have the newest version by executing git pull inside its directory.
+We will start this section with a simple lab about using caching to speed up the building process. All commands presented in these labs will be executed inside __Docker-for-Developers-Handbook/Chapter2__ directory.
 
 
 >NOTE: For the mere purpose of show you different tools for working with containers, we will use in these labs nerdctl, podman or docker clients to run commands against containerd or docker container runtimes. Each tool has its own features and particularities but most of the work within containers will execute similar. We will explicitly notify you if some command shown requires a specific tool. Follow the specific instructions for installing each tool you will find in this book’s github code repository.
@@ -89,7 +76,7 @@ Notice that we separated here the content copy in three lines; although we could
 >NOTE: As you should have noticed, this Dockerfile does not include any USER directive, but it application runs without any privileges because it is very simple and doesn’t use any Linux capability or privileged port. Anyway, it is good practice to include USER directive and you may add it in your own local repository. Everything described in the next steps will work. 
 We will add time to the build command to measure the time the build process takes.
 ```
-$ time nerdctl build -t ch2lab1:first --label nodejs=18.14.2 --label=base=alpine3.16 nodejs  --progress plain
+$ time nerdctl build -t ch2lab1:one --label nodejs=18.14.2 --label=base=alpine3.16 nodejs  --progress plain
 #1 [internal] load .dockerignore
 #1 transferring context: 2B done
 #1 DONE 0.0s
@@ -181,8 +168,8 @@ $ time nerdctl build -t ch2lab1:first --label nodejs=18.14.2 --label=base=alpine
 #11 sending tarball
 #11 sending tarball 0.6s done
 #11 DONE 0.8s
-unpacking docker.io/library/ch2lab1:first (sha256:7f63598f21445e5c6a051c9eca9c89367152dd59a4f1af366dc3291ae3e01930)...
-Loaded image: docker.io/library/ch2lab1:first
+unpacking docker.io/library/ch2lab1:one (sha256:7f63598f21445e5c6a051c9eca9c89367152dd59a4f1af366dc3291ae3e01930)...
+Loaded image: docker.io/library/ch2lab1:one
 real    0m12.588s
 user    0m0.009s
 sys     0m0.000s
@@ -194,7 +181,7 @@ Change from var APP_VERSION="1.0"; to any other value, for example
 var APP_VERSION="1.1";.
 Execute again the first step with a new tag. And notice the CACHED lines in the output.
 ```
-$ time nerdctl build -t ch2lab1:second --label nodejs=18.14.2 --label=base=alpine3.16  nodejs  --progress plain
+$ time nerdctl build -t ch2lab1:two --label nodejs=18.14.2 --label=base=alpine3.16  nodejs  --progress plain
 #1 [internal] load .dockerignore
 #1 transferring context: 2B done
 #1 DONE 0.0s
@@ -236,8 +223,8 @@ $ time nerdctl build -t ch2lab1:second --label nodejs=18.14.2 --label=base=alpin
 #11 sending tarball
 #11 sending tarball 0.6s done
 #11 DONE 0.7s
-unpacking docker.io/library/ch2lab1:second (sha256:bfffba0cd2d7cc82f686195b0b996731d0d5a49e4f689a3d39c7b0e6c57dcf0e)...
-Loaded image: docker.io/library/ch2lab1:second
+unpacking docker.io/library/ch2lab1:two (sha256:bfffba0cd2d7cc82f686195b0b996731d0d5a49e4f689a3d39c7b0e6c57dcf0e)...
+Loaded image: docker.io/library/ch2lab1:two
 real    0m1.272s
 user    0m0.007s
 sys     0m0.000s
@@ -264,7 +251,7 @@ EXPOSE 3000
 
 We execute the build process again. We expect it to last less than 12 seconds because the base image is already in our host.
 ```
-$ time nerdctl build -t ch2lab1:third --label nodejs=18.14.2 --label=base=alpine3.16  nodejs  --progress plain
+$ time nerdctl build -t ch2lab1:three --label nodejs=18.14.2 --label=base=alpine3.16  nodejs  --progress plain
 #1 [internal] load .dockerignore
 #1 transferring context: 2B done
 #1 DONE 0.0s
@@ -323,8 +310,8 @@ $ time nerdctl build -t ch2lab1:third --label nodejs=18.14.2 --label=base=alpine
 #9 sending tarball
 #9 sending tarball 0.6s done
 #9 DONE 0.8s
-unpacking docker.io/library/ch2lab1:third (sha256:b38074f0ee5a9e6c4ee7f68e90d8a25575dc7df9560b0b66906b29f3feb8741c)...
-Loaded image: docker.io/library/ch2lab1:third
+unpacking docker.io/library/ch2lab1:three (sha256:b38074f0ee5a9e6c4ee7f68e90d8a25575dc7df9560b0b66906b29f3feb8741c)...
+Loaded image: docker.io/library/ch2lab1:three
 real    0m4.634s
 user    0m0.004s
 sys     0m0.003s
@@ -338,7 +325,7 @@ var APP_VERSION="1.2";
 ```
 And execute the build process again:
 ```
-$ time nerdctl build -t ch2lab1:fourth --label nodejs=18.14.2 --label=base=alpine3.16  nodejs  --progress plain
+$ time nerdctl build -t ch2lab1:four --label nodejs=18.14.2 --label=base=alpine3.16  nodejs  --progress plain
 #1 [internal] load build definition from Dockerfile
 #1 transferring dockerfile: 243B done
 #1 DONE 0.0s
@@ -393,8 +380,8 @@ $ time nerdctl build -t ch2lab1:fourth --label nodejs=18.14.2 --label=base=alpin
 #9 sending tarball
 #9 sending tarball 0.6s done
 #9 DONE 0.8s
-unpacking docker.io/library/ch2lab1:fourth (sha256:75ba902c55459593f792c816b8da55a673ffce3633f1504800c90ec9fd214d26)...
-Loaded image: docker.io/library/ch2lab1:fourth
+unpacking docker.io/library/ch2lab1:four (sha256:75ba902c55459593f792c816b8da55a673ffce3633f1504800c90ec9fd214d26)...
+Loaded image: docker.io/library/ch2lab1:four
 real    0m5.210s
 user    0m0.007s
 sys     0m0.000s
