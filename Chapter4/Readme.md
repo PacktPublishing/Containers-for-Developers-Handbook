@@ -356,7 +356,7 @@ CONTAINER ID   NAME      CPU %     MEM USAGE / LIMIT     MEM %     NET I/O     B
 $ docker container kill stress 
 stress 
 
-$ docker run -d --name stress-limmited  --memory 128M stress stress-ng --vm-bytes 1024M  --fork 1 -m 1 
+$ docker run -d --name stress-limited  --memory 128M stress stress-ng --vm-bytes 1024M  --fork 1 -m 1 
 238e34215885f5fc20b0ff157f17b18e6559720c7453064a1c7aedb9cb635284 
 ```
 Now we execute again the stats action continuously (to show the output in this book we execute it using --no-stream few times) and we can verify that although stress-ng runs a process with 1024 megabytes, the container never uses that amount of memory:  
@@ -365,14 +365,14 @@ $ docker stats --no-stream
 
 CONTAINER ID   NAME              CPU %     MEM USAGE / LIMIT   MEM %     NET I/O       BLOCK I/O   PIDS 
 
-ff3f4797af43   stress-limmited   166.65%   125.1MiB / 128MiB   97.74%    1.12kB / 0B   0B / 0B     4 
+ff3f4797af43   stress-limited   166.65%   125.1MiB / 128MiB   97.74%    1.12kB / 0B   0B / 0B     4 
 ```
 Waiting few seconds and executing again: 
 ```
 $ docker stats --no-stream 
 
 CONTAINER ID   NAME              CPU %     MEM USAGE / LIMIT   MEM %     NET I/O       BLOCK I/O   PIDS 
-ff3f4797af43   stress-limmited   142.81%   127MiB / 128MiB     99.19%    1.12kB / 0B   0B / 0B     5 
+ff3f4797af43   stress-limited   142.81%   127MiB / 128MiB     99.19%    1.12kB / 0B   0B / 0B     5 
 ```
 As we expected, memory usage is limited. You can verify what happened by reviewing the current host’s system log. The container runtime uses cgroups to limit the container’s use of resources and the kernel launched the OOM-Killer feature to kill the processes consuming more memory than expected: 
 ```
@@ -392,8 +392,8 @@ This kernel feature is killing the stress-ng worker processes, but it launches m
 
 5. We finish this lab by simply removing the used containers: 
 ```
-$ docker container rm --force stress-limmited 
-stress-limmited 
+$ docker container rm --force stress-limited 
+stress-limited 
 ```
 
 ## Avoid using root user inside containers   
