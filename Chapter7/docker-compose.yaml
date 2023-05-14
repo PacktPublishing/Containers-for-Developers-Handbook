@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  # load balancer
+  lb:
+    image: frjaraur/simplestlab:simplestlb
+    environment:
+      - APPLICATION_ALIAS=app
+      - APPLICATION_PORT=3000
+    networks:
+      simplestlab:
+    ports:
+    - target: 80
+      published: 8080
+      protocol: tcp
+  db:
+    image: frjaraur/simplestlab:simplestdb
+    environment:
+      - POSTGRES_PASSWORD_FILE=/run/secrets/dbpasswd.env
+    networks:
+       simplestlab:
+    secrets:
+    - dbpasswd.env
+    configs:
+    - source: init-demo.sh
+      target: /docker-entrypoint-initdb.d/init-demo.sh
+      mode: 0555
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+  app:
+    image: frjaraur/simplestlab:simplestapp
+    secrets:
+    - source: dbconfig.json
+      target: /APP/dbconfig.json
+      mode: 0555
+    networks:
+       simplestlab:
+
+volumes:
+  pgdata:
+
+networks:
+  simplestlab:
+
+configs:
+  init-demo.sh:
+    external: true
+secrets: 
+  dbpasswd.env:
+    external: true
+  dbconfig.json:
+    external: true
