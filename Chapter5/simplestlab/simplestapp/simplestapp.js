@@ -46,6 +46,13 @@ http.createServer(function (req, res) {
 
   if (req.url == "/favicon.ico"){return;}
  
+  if (req.url == "/healthz"){
+    res.writeHead(200, { 'Content-Type': 'text/html; charset=UTF-8' });
+    res.write("OK");
+    res.end();
+    return;
+  }
+
   if (req.url == "/Chart.js") {
     res.writeHead(200, {'Content-Type': 'application/javascript'});
     fs.createReadStream('./Chart.js').pipe(res);

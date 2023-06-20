@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: nettools
+  name: nettools
+spec:
+  containers:
+  - command:
+    - /bin/sh
+    args:
+    - -c
+    - "sleep INF"
+    image: docker.io/frjaraur/nettools:small-1.0
+    name: nettools
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
