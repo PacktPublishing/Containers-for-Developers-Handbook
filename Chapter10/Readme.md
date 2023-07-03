@@ -493,7 +493,28 @@ kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        12d
 lb           NodePort    10.108.36.202   <none>        80:32000/TCP   4m24s
 ```
 
-For this new service, we have already created a new ConfigMap manifest, ___lb.configmap.for-app2-service.yaml___:
+We remove the old app service:
+```
+$ kubectl delete svc app
+service "app" deleted
+```
+
+The application isn't accesible now at http://localhost:32000):
+![applicationGUI](images/Figure2.PNG)
+
+Or using the command-line with curl:
+```
+$ curl http://localhost:32000
+<html>
+<head><title>502 Bad Gateway</title></head>
+<body>
+<center><h1>502 Bad Gateway</h1></center>
+<hr><center>nginx/1.25.1</center>
+</body>
+</html>
+```
+
+We will now configure the new app2 service. We have already created a new ConfigMap manifest, ___lb.configmap.for-app2-service.yaml___:
 ```
 apiVersion: v1
 kind: ConfigMap
@@ -625,7 +646,7 @@ http {
 ```
 
 As you can see, the ConfigMap's content was now updated inside the container and the application now still works, but this time using ___app2___ Service, as we can verify (if using Docker Desktop you will need to use http://localhost:32000):
-![applicationGUI](images/Figure2.PNG)
+![applicationGUI](images/Figure3.PNG)
 
 
 
