@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: all-app-allowed-traffic
+spec:
+  podSelector:
+    matchLabels:
+      component: db
+      app: simplestlab
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              component: app
+              app: simplestlab
+      ports:
+        - protocol: TCP
+          port: 5432
