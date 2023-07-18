@@ -21,6 +21,16 @@ These are the tasks you will find in this repository:
 
 These labs will definitely help you understand how to improve the security of an application by isolating its components and exposing and publishing only those required for the users and other application’s components.
 
+>NOTE: Docker Desktop and Rancher Desktop are great tools for testing Kubernetes features on your desktop computer. You can remove all your Kubernetes data with a simple click in their ___Troubleshooting___ sections. Here are a screenshot for each platform: 
+>
+>- Docker Desktop 
+>![AppGui](images/reset-docker.PNG)
+>
+>- Rancher Desktop 
+>![AppGui](images/reset-rancher.PNG)
+>
+>The Reset Kubernetes button, completely removes all the workloads and resources created, which is great to start things over. I really recommend reseting your cluster before starting this Labs section.
+
 
 ## Deploying your own Ingress Controller
 In this first task, we will deploy our own Ingress Controller. We are using Docker Desktop, which provides a good LoadBalancer service implementation. These Service resources will attach the localhost IP address, which will makeit easy to connect to the published services.
