@@ -13,6 +13,17 @@ You can use one of the following Kubernetes Desktop environments:
 - KinD
 The Labs will work on any of then, and of course, on any other Kubernetes environment. You may find issues with their defualt storage class, but there are some comments on the files that may be changed.
 
+>NOTE: Docker Desktop and Rancher Desktop are great tools for testing Kubernetes features on your desktop computer. You can remove all your Kubernetes data with a simple click in their ___Troubleshooting___ sections. Here are a screenshot for each platform: 
+>
+>- Docker Desktop 
+>![AppGui](images/reset-docker.PNG)
+>
+>- Rancher Desktop 
+>![AppGui](images/reset-rancher.PNG)
+>
+>The Reset Kubernetes button, completely removes all the workloads and resources created, which is great to start things over. I really recommend reseting your cluster before starting this Labs section.
+
+
 ## Improving the simplelab application on Kubernetes
 
 In this lab we will modify the simplelab, a very simplified tier-3 application (loadbalanccer could present additional static content but it is not added for the purposes of the labs), to make it more secure by adding Secret resources for defining all the required user authentications. 
