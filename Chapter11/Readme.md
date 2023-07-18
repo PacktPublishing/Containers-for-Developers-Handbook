@@ -119,7 +119,7 @@ Chapter11$ curl -k https://localhost
 Ingress Controller is deployed and listening, the 404 error indicates that there isn't an associated ingress with localhost host (there isn't even a default one configured, but Ingress Controller responds correclty).
 
 
-## Publishing the simplelab application on Kubernetes using an Ingress Controller (No TLS)
+## Publishing the simplestlab application on Kubernetes using an Ingress Controller (No TLS)
 
 In this lab we will deploy the simplelab, a very simplified tier-3 application, located in the ___simplestlab___ directory and publish its frontend, __lb__ component.
 
@@ -337,7 +337,7 @@ This requires root or Administrator access, hence it may be more interesting to 
 
 We will now learn how to add TLS to the Ingress resource to improve our application security.
 
-## Publishing the simplelab application on Kubernetes using an Ingress Controller (TLS)
+## Publishing the simplestlab application on Kubernetes using an Ingress Controller (TLS)
 
 >__IMPORTANT NOTE: For this lab to work it is required to either use _curl --resolve_ or change your hosts file.__
 
