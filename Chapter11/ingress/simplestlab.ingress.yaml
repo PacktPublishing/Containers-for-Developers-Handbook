@@ -16,11 +16,5 @@ spec:
           service:
             name: lb
             port:
-              number: 8080
-      - path: /webserver
-        pathType: Prefix
-        backend:
-          service:
-            name: webserver
-            port:
               number: 80
+
