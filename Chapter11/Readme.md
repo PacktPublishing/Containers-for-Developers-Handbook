@@ -370,7 +370,7 @@ subject=C = CN, ST = ES, L = MA, O = Labs, CN = *.local.lab
 A key and an associated certificate were created:
 ``` 
 Chapter11$ ls *tls*
-tls.crt  tls.key
+tls.crt  tls.csr  tls.key
 ```
 And now we will create a secret with the key and certificate created:
 ```
@@ -429,7 +429,7 @@ Chapter11$ curl -H "host: simplestlab.local.lab" http://localhost/
 ```
 
 We tested port 80, and the Ingress Controller redirects our request to HTTPS.
->NOTE: We can use __-L__ to follow the redirection. This will work if you changed yor __hosts__ file.
+>NOTE: We can use __-L__ to follow the redirection. This will work if you changed yor __hosts__ file. In this case, you will not need to use --resolve, and you can use curl https://simplestlab.local.lab/ directly.
 
 We now test the HTTPS port. Notice that we used --resove argument. This will resolve the DNS name to 127.0.0.1 before sending the request. If you still use the header, you will get the "Ingress Fake" certificate because the host name is not read correctly:
 ``` 
