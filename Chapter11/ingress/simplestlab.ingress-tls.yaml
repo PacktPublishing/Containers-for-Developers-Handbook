@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: simplestlab
+  annotations:
+    # nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: simplestlab.local.lab
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: lb
+            port:
+              number: 80
+  tls:
+  - hosts:
+      - simplestlab.local.lab
+    secretName: simplestlab-tls

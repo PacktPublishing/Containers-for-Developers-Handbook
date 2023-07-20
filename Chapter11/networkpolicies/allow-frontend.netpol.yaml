@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend
+spec:
+  podSelector:
+    matchLabels:
+      component: lb
+      app: simplestlab
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            # except:
+            #   - 172.17.1.11/32 # Use the IP address of nettools pod.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+          podSelector:
+            matchLabels:
+              app: nettools
+      ports:
+        - protocol: TCP
+          port: 8080
