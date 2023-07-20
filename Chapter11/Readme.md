@@ -34,6 +34,8 @@ These labs will definitely help you understand how to improve the security of an
 >The Reset Kubernetes button, completely removes all the workloads and resources created, which is great to start things over. I really recommend reseting your cluster before starting this Labs section.
 
 
+# Improving applications access with an Ingress Controller
+
 ## Deploying your own Ingress Controller
 In this first task, we will deploy our own Ingress Controller. We are using Docker Desktop, which provides a good LoadBalancer service implementation. These Service resources will attach the localhost IP address, which will makeit easy to connect to the published services.
 
@@ -689,6 +691,8 @@ As you can see, we obtained the Ingress Controller common Fake Certificate, incl
 
 
 ---
+
+# Improving you application security with NetworkPolicy resources
 
 Stop Docker Desktop because this tool doesn't provide NetworkPolicy integration. Its special CNI does not integrate NetworkPolicy resources at the time of writting this lab.
 
