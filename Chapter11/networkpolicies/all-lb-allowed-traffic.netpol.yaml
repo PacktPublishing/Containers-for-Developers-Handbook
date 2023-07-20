@@ -12,8 +12,8 @@ spec:
     - Egress
   ingress:
     - from:
-        - ipBlock:
-            cidr: 0.0.0.0/0
+       #- ipBlock:
+       #    cidr: 0.0.0.0/0
             # except:
             #   - 172.17.1.11/32 # Use the IP address of nettools pod.
         - namespaceSelector:
@@ -29,7 +29,7 @@ spec:
     - to:
         - podSelector:
             matchLabels:
-              component: lb
+              component: app
               app: simplestlab
       ports:
         - protocol: TCP

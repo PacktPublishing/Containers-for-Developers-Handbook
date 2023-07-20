@@ -2,17 +2,19 @@
 
 ## __Technical requirements__
 
-The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use Docker Desktop as container runtime and WSL2 (or you Linux/MacOS terminal) to execute the commands described. 
+The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use Docker Desktop as container runtime and WSL2 (or you Linux/MacOS terminal) to execute the commands described for the first part of the Labs (Ingress Controller) and then we will start a Minikube environment for the second part (NetworkPolicy resources).
+
+>__IMPORTANT NOTE: Please stop Docker Desktop before creating your Minikube environemnt. Both can run at the same time but they will consume lot of hardware resources and you should choose the right Kubernetes context for your environment.__ 
 
 Ensure you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter11 directory. 
 
 You can use one of the following Kubernetes Desktop environments:
 - Docker Desktop (NetworkPolicy resources are not available at the time of writting this book in this platform)
-- Rancher Desktop
-- Minikube
+- Rancher Desktop (supports NetworkPolicy resources)
+- Minikube (supports NetworkPolicy resources)
 - KinD
 
-The Ingress Controller Lab will work on any of them. Each Kubernetes desktop or platform implementation manages and presents its own networking infrastructure to the users in a different way.
+The Ingress Controller lab will work on any of them, but for the NetworkPolicy resources part you will need to use an appropriate Kuberneted CNI, with support for such resources. Each Kubernetes desktop or platform implementation manages and presents its own networking infrastructure to the users in a different way.
 
 These are the tasks you will find in this repository:
 - We will first deploy the Kubernetes Nginx Ingress Controller (if you don’t have your own Ingress Controller in your labs platform).
@@ -615,7 +617,7 @@ Chapter11$ curl --resolve simplestlab.local.lab:443:127.0.0.1 https://simplestla
 Notice that we used verbose mode with curl command to verify the certificate presented by the requested url.
 
 Now we try directly, without the defined host,. The Ingress Controller will show us a 404 error again, but we review the certificate of the connection:
-````
+```
 Chapter11 $ curl https://localhost -k -I -vvv
 *   Trying 127.0.0.1:443...
 * Connected to localhost (127.0.0.1) port 443 (#0)
@@ -684,3 +686,501 @@ strict-transport-security: max-age=15724800; includeSubDomains
 ```
 
 As you can see, we obtained the Ingress Controller common Fake Certificate, included by default in the installation. Of course, this certificate can also be changed, but it will affect all yout Ingress without a specific certificate and its management will be part of the daily tasks of your Kubernetes platform administrators.
+
+
+---
+
+Stop Docker Desktop because this tool doesn't provide NetworkPolicy integration. Its special CNI does not integrate NetworkPolicy resources at the time of writting this lab.
+
+Start a Minikube environment with Calico. For this to work, open a PowerShell command line with Administrator rights and run minikube start (first ensure you have enough RAM available):
+```
+PS C:\Users\frjaraur> minikube start --memory 4G --kubernetes-version=stable  --driver=hyperv --cni=calico
+😄  minikube v1.30.1 on Microsoft Windows 10 Pro 10.0.19045.3208 Build 19045.3208
+✨  Using the hyperv driver based on user configuration
+👍  Starting control plane node minikube in cluster minikube
+🔥  Creating hyperv VM (CPUs=2, Memory=4096MB, Disk=20000MB) ...
+🐳  Preparing Kubernetes v1.26.3 on Docker 20.10.23 ...
+    ▪ Generating certificates and keys ...
+    ▪ Booting up control plane ...
+    ▪ Configuring RBAC rules ...
+🔗  Configuring Calico (Container Networking Interface) ...
+🔎  Verifying Kubernetes components...
+    ▪ Using image gcr.io/k8s-minikube/storage-provisioner:v5
+🌟  Enabled addons: storage-provisioner, default-storageclass
+🏄  Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+```
+
+Now we can move to our Chapter11 labs directory, localted inside our local Github repository and we change the prompt for easier reading:
+```
+PS C:\Users\frjaraur\Documents\...\Chapter11> function prompt {"Chapter11$ "}
+Chapter11$
+```
+
+From now on, our prompt will be set to ___Chapter11$___.
+
+We now recreate the ___simplestlab___ application:
+``` 
+Chapter11$ kubectl create ns simplestlab
+namespace/simplestlab created
+
+Chapter11$ kubectl create -f simplestlab -n simplestlab
+deployment.apps/app created
+service/app created
+secret/appcredentials created
+service/db created
+statefulset.apps/db created
+secret/dbcredentials created
+secret/initdb created
+configmap/lb-config created
+daemonset.apps/lb created
+service/lb created
+```
+
+We verify all the workload resources created status:
+```
+Chapter11$ kubectl get all -n simplestlab
+NAME                      READY   STATUS    RESTARTS   AGE
+pod/app-b6bbb5f6c-56kmx   1/1     Running   0          6m3s
+pod/app-b6bbb5f6c-dq8sp   1/1     Running   0          6m3s
+pod/app-b6bbb5f6c-vctmj   1/1     Running   0          6m3s
+pod/db-0                  1/1     Running   0          6m2s
+pod/lb-kdp89              1/1     Running   0          6m2s
+
+NAME          TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/app   ClusterIP   10.102.249.242   <none>        3000/TCP   6m3s
+service/db    ClusterIP   None             <none>        5432/TCP   6m2s
+service/lb    ClusterIP   10.103.51.42     <none>        80/TCP     6m2s
+
+NAME                DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+daemonset.apps/lb   1         1         1       1            1           <none>          6m2s
+
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/app   3/3     3            3           6m3s
+
+NAME                            DESIRED   CURRENT   READY   AGE
+replicaset.apps/app-b6bbb5f6c   3         3         3       6m3s
+
+NAME                  READY   AGE
+statefulset.apps/db   1/1     6m2s
+```
+
+
+And now let's create a simple nettools container (container image with network tools ready to use for testing):
+```
+Chapter11$ kubectl run nettools --image=docker.io/frjaraur/nettools:small -- sleep INF
+pod/nettools created
+```
+
+We will use this Pod for testing. First we verify its access without any NetworkPolicy resource:
+
+- Access to the ___lb___ commponent:
+```
+Chapter11$ kubectl exec -ti nettools -- curl lb.simplestlab.svc:80 -I
+HTTP/1.1 200 OK
+Server: nginx/1.25.1
+Date: Thu, 20 Jul 2023 09:22:41 GMT
+Content-Type: text/html; charset=UTF-8
+Connection: keep-alive
+```
+
+- Access to the ___app___ commponent:
+```
+Chapter11$ kubectl exec -ti nettools -- curl app.simplestlab.svc:3000 -I
+HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+Date: Thu, 20 Jul 2023 09:24:13 GMT
+Connection: keep-alive
+Keep-Alive: timeout=5
+```
+
+- Access to the ___db___ commponent:
+```
+Chapter11$ kubectl exec -ti nettools -- curl db.simplestlab.svc:5432 -I
+curl: (52) Empty reply from server
+command terminated with exit code 52
+
+Chapter11$ kubectl exec -ti nettools -- curl db.simplestlab.svc:5434 -I
+curl: (7) Failed to connect to db.simplestlab.svc port 5434 after 1 ms: Connection refused
+command terminated with exit code 7
+```
+>NOTE: Notice that we tested both, port ___5432___ (correct port) and ___5434___ (incorrect port), just to show you that __curl__ can be a great tool for testing communications, even if the backends doesn't presetn HTTP/HTTPS.
+
+Now we can start playing with the NetworkPlociy manifests prepared for you.
+
+## Disable all traffic
+
+We will first remove all communications __to__ and __from__ the Pods in ___simplestlab___ namespace by using [disable-all-traffic.yaml](./networkpolicies/disable-all-traffic.yaml):
+```
+Chapter11$ gc .\networkpolicies\disable-all-traffic.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: disable-all-traffic
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+
+
+Chapter11$ kubectl create -f .\networkpolicies\disable-all-traffic.yaml -n simplestlab
+networkpolicy.networking.k8s.io/disable-all-traffic created
+```
+
+And now we test again from nettools Pod:
+```
+Chapter11$ kubectl exec -ti nettools -- curl http://lb.simplestlab.svc:80 --connect-timeout 3 -I
+curl: (28) Connection timeout after 3001 ms
+command terminated with exit code 28
+
+Chapter11$ kubectl exec -ti nettools -- curl http://app.simplestlab.svc:3000 --connect-timeout 3 -I 3
+curl: (28) Connection timeout after 3001 ms
+command terminated with exit code 28
+
+Chapter11$ kubectl exec -ti nettools -- curl db.simplestlab.svc:5432 --connect-timeout 3 -I
+curl: (28) Connection timeout after 3001 ms
+command terminated with exit code 28
+```
+
+Connectivity from nettools Pod is lost.
+Let's try from the ___lb___ component:
+```
+Chapter11$ kubectl get pods -n simplestlab -o wide
+NAME                  READY   STATUS    RESTARTS   AGE   IP              NODE       NOMINATED NODE   READINESS GATES
+app-b6bbb5f6c-56kmx   1/1     Running   0          24m   10.244.120.69   minikube   <none>           <none>
+app-b6bbb5f6c-dq8sp   1/1     Running   0          24m   10.244.120.71   minikube   <none>           <none>
+app-b6bbb5f6c-vctmj   1/1     Running   0          24m   10.244.120.70   minikube   <none>           <none>
+db-0                  1/1     Running   0          24m   10.244.120.68   minikube   <none>           <none>
+lb-kdp89              1/1     Running   0          24m   10.244.120.67   minikube   <none>           <none>
+
+Chapter11$ kubectl exec -ti lb-kdp89 -n simplestlab -- curl db.simplestlab.svc:5432 --connect-timeout 3 -I
+curl: (28) Resolving timed out after 3000 milliseconds
+command terminated with exit code 28
+
+Chapter11$ kubectl exec -ti lb-kdp89 -n simplestlab -- curl app.simplestlab.svc:3000 --connect-timeout 3 -I
+curl: (28) Resolving timed out after 3000 milliseconds
+command terminated with exit code 28
+
+Chapter11$ kubectl exec -ti lb-kdp89 -n simplestlab -- curl 10.244.120.71:3000 --connect-timeout 3 -I
+curl: (28) Failed to connect to 10.244.120.71 port 3000 after 3001 ms: Timeout was reached
+command terminated with exit code 28
+```
+
+Notice that we are not able to even resolve the Service resources DNS names. And of course, we are not able to either access any of the ___app___ component Pods' IP addresses. Communications are completely isolated. In this example we disabled any INGRESS or EGRESS connectivity.
+
+If we now add a NetworkPolicy allowing connectivity from nettools Pod (in fact, notice that the ipBlock 0.0.0.0/0 is also added, allowing any IP address), something changes:
+```
+Chapter11$ gc .\networkpolicies\allow-frontend.netpol.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-frontend
+spec:
+  podSelector:
+    matchLabels:
+      component: lb
+      app: simplestlab
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            # except:
+            #   - 172.17.1.11/32 # Use the IP address of nettools pod.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+          podSelector:
+            matchLabels:
+              app: nettools
+      ports:
+        - protocol: TCP
+          port: 8080
+
+Chapter11$ kubectl create -f .\networkpolicies\allow-frontend.netpol.yaml -n simplestlab
+networkpolicy.networking.k8s.io/allow-frontend created
+
+Chapter11$ kubectl exec -ti nettools -- curl http://lb.simplestlab.svc:80 --connect-timeout 3 -I
+
+HTTP/1.1 504 Gateway Time-out
+Server: nginx/1.25.1
+Date: Thu, 20 Jul 2023 09:45:07 GMT
+Content-Type: text/html
+Content-Length: 167
+Connection: keep-alive
+
+```
+
+We get a 504 error because our ___lb___ component doesn't have any EGRESS connectivity allowed. It wouldn't be able to reach the ___app___ backend. The execution took a lot of time because the --connect-timeout only applies to the ___lb___ component, but this required access to the DNS and then to the ___app___. In this case the DNS wasn't reached and error interrupted the application in the ____lb___ component directly.
+
+## Enable namespaced traffic
+
+All the traffic between Pods in the ___simplestlab___ is forbiden, hence our application doesn't work. Internal communications are required.
+
+We should implement NetworkPolicy resources for each component, allowing only extrictly required communications, but sometimes we can grant namespaced access just to ensure everything works correctly.
+
+We will now create a NetworkPolicy allowing all the internal traffic, between components running in ___simplestlab___ namespace:
+```
+Chapter11$ gc .\networkpolicies\allow-namespaced.netpol.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-namespaced
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+  egress:
+  - to:
+      - podSelector: {}
+  - to:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: kube-system
+    ports:
+      - protocol: UDP
+        port: 53
+
+  ingress:
+  - from:
+      - podSelector: {}
+
+
+Chapter11$ kubectl create -f .\networkpolicies\allow-namespaced.netpol.yaml -n simplestlab
+networkpolicy.networking.k8s.io/allow-namespaced created
+
+```
+
+Let's test again our ___lb___ frontend component from ___nettools__, running in the ___default___ namespace:
+```
+Chapter11$ kubectl exec -ti nettools -- curl http://lb.simplestlab.svc:80 --connect-timeout 3 -I
+HTTP/1.1 200 OK
+Server: nginx/1.25.1
+Date: Thu, 20 Jul 2023 09:54:18 GMT
+Content-Type: text/html; charset=UTF-8
+Connection: keep-alive
+```
+
+It works correctly as expected because we still have a NetworkPolicy allowing access to the ___lb___ component. Notice that we added UDP EGRESS to port 53. Our application's component will be able to reach the internal DNS, which is crucial for resolving and then reaching other components. __Remember, we started with a DENY ALL policy.__
+
+Let's try now the ___app___ component.
+```
+Chapter11$ kubectl exec -ti nettools -- curl http://app.simplestlab.svc:3000 --connect-timeout 3 -I
+curl: (28) Connection timeout after 3001 ms
+command terminated with exit code 28
+```
+
+The ___app___ component isn't reachable from ___nettools___ in ___default___ namespace (neither is the database).
+
+We can go a bit further and fine-grain the network connectivity now.
+
+## Allowing only specific and required traffic for the simplest lab application
+
+We will first remove the allow-namespaced and the allow-frontend policies:
+```
+Chapter11$ kubectl get netpol -n simplestlab
+NAME                  POD-SELECTOR                   AGE
+allow-frontend        app=simplestlab,component=lb   21m
+allow-namespaced      <none>                         11m
+disable-all-traffic   <none>                         35m
+
+Chapter11$ kubectl delete netpol  -n simplestlab allow-frontend allow-namespaced
+networkpolicy.networking.k8s.io "allow-frontend" deleted
+networkpolicy.networking.k8s.io "allow-namespaced" deleted
+
+```
+
+And now we create the component-specific NetworkPolicy manifests:
+
+- For the ___db___ component we allow only INGRESS access from the ___app___ component, in the same namespace:
+```
+Chapter11$ gc .\networkpolicies\all-db-allowed-traffic.netpol.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: all-db-allowed-traffic
+spec:
+  podSelector:
+    matchLabels:
+      component: db
+      app: simplestlab
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              component: app
+              app: simplestlab
+      ports:
+        - protocol: TCP
+          port: 5432
+
+
+Chapter11$ kubectl create -f .\networkpolicies\all-db-allowed-traffic.netpol.yaml -n simplestlab
+networkpolicy.networking.k8s.io/all-db-allowed-traffic created
+
+```
+- For the ___app___ component we allow INGRESS access from the ___lb___ component, in the same namespace, and EGRESS to Kubernetes DNS and the ___db___ component (port 5432):
+```
+Chapter11$ gc .\networkpolicies\all-app-allowed-traffic.netpol.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: all-app-allowed-traffic
+spec:
+    matchLabels:
+      component: app
+      app: simplestlab
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              component: lb
+              app: simplestlab
+      ports:
+        - protocol: TCP
+          port: 3000
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              component: db
+              app: simplestlab
+      ports:
+        - protocol: TCP
+          port: 5432
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+Chapter11$ kubectl create -f .\networkpolicies\all-app-allowed-traffic.netpol.yaml
+networkpolicy.networking.k8s.io/all-app-allowed-traffic created
+```
+
+- For the ___lb___ component we allow INGRESS access from the ___nettools___ Pod (notice that we have a comment on 0.0.0.0/0 ipBlock), in the ___default___ namespace, to port 8080 (which is the port of the ___lb___ Pods, not the Service resource), and EGRESS to Kubernetes DNS and the ___app___ component (port 3000):
+```
+Chapter11$ gc .\networkpolicies\all-lb-allowed-traffic.netpol.yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: all-lb-allowed-traffic
+spec:
+  podSelector:
+    matchLabels:
+      component: lb
+      app: simplestlab
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+       #- ipBlock:
+       #     cidr: 0.0.0.0/0
+            # except:
+            #   - 172.17.1.11/32 # Use the IP address of nettools pod.
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: default
+          podSelector:
+            matchLabels:
+              app: nettools
+      ports:
+        - protocol: TCP
+          port: 8080
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              component: lb
+              app: simplestlab
+      ports:
+        - protocol: TCP
+          port: 3000
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+Chapter11$ kubectl create -f .\networkpolicies\all-lb-allowed-traffic.netpol.yaml -n simplestlab
+networkpolicy.networking.k8s.io/all-lb-allowed-traffic created
+```
+
+We now review the NetworkPolicy resources in simplestlab namespace:
+```
+Chapter11$ kubectl get netpol -n simplestlab
+NAME                      POD-SELECTOR                    AGE
+all-app-allowed-traffic   app=simplestlab,component=app   10m
+all-db-allowed-traffic    app=simplestlab,component=db    10s
+all-lb-allowed-traffic    app=simplestlab,component=lb    3m34s
+disable-all-traffic       <none>                          47m
+```
+
+The POD-SELECTOR columm shows which Pods will be affected by the NetworkPolicy. 
+
+Let's test now accesses from ___netools___ Pod:
+
+```
+Chapter11$ kubectl exec -ti nettools -- curl http://app.simplestlab.svc:3000 --connect-timeout 3 -I
+curl: (28) Connection timeout after 3001 ms
+command terminated with exit code 28
+```
+
+This is expected, because ___app___ component should only be reachable from ___lb___ component.
+
+```
+Chapter11$ kubectl exec -ti nettools -- curl http://lb.simplestlab.svc:80 --connect-timeout 3 -I
+curl: (28) Connection timeout after 3000 ms
+command terminated with exit code 28
+```
+This may be unexpected for you but the solution is quite simple. Let's take a look at the ___nettools___ Pod's labels:
+```
+Chapter11$ kubectl get pods --show-labels
+NAME       READY   STATUS    RESTARTS   AGE   LABELS
+nettools   1/1     Running   0          70m   run=nettools
+```
+
+Notice that the [all-lb-allowed-traffic.netpol.yaml](./networkpolicies/all-lb-allowed-traffic.netpol.yaml) NetworkPolicy allows only access from Pods with label ___app=nettools___, running in the default namespace. Hence the current ___nettools___ Pod isn't affected by this rule. 
+
+Let's fix this by adding the appropriate label:
+```
+Chapter11$ kubectl label pod nettools app=nettools
+pod/nettools labeled
+Chapter11$ kubectl get pods --show-labels
+NAME       READY   STATUS    RESTARTS   AGE   LABELS
+nettools   1/1     Running   0          78m   app=nettools,run=nettools
+```
+
+Let's test again:
+```
+Chapter11$ kubectl exec -ti nettools -- curl http://lb.simplestlab.svc:80 --connect-timeout 3 -I
+HTTP/1.1 200 OK
+Server: nginx/1.25.1
+Date: Thu, 20 Jul 2023 10:43:58 GMT
+Content-Type: text/html; charset=UTF-8
+Connection: keep-alive
+```
+
+Now everything works as expected ;)
+
+
+## Remove the Minikube environment
+We can end this lab session by removing the Minikube environment:
+```
+Chapter11$ minikube delete
+✋  Stopping node "minikube"  ...
+🛑  Powering off "minikube" via SSH ...
+🔥  Deleting "minikube" in hyperv ...
+💀  Removed all traces of the "minikube" cluster.
+
+```
+
