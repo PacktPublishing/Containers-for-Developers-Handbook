@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    component: app
+    app: simplestlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: app
+      app: simplestlab
+  template:
+    metadata:
+      labels:
+        component: app
+        app: simplestlab
+    spec:
+      containers:
+      - name: app
+        image: myregistry/simplest-lab:simplestapp
+        ports:
+        - containerPort: 3000
+        env:
+        - name: dbhost 
+          value: simplestdb
+        - name: dbname
+          value: demo
+        - name: dbuser
+          value: demo
+        - name: dbpasswd
+          value: d3m0   

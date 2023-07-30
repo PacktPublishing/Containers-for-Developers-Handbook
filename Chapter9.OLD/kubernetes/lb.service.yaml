@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb
+spec:
+  selector:
+    app: simplestlb
+    component: lb
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

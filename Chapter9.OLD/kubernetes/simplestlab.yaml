@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simplestlab
+  labels:
+    app: simplestlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simplestlab
+  template:
+    metadata:
+      labels:
+        app: simplestlab
+    spec:
+      containers:
+      - name: lb
+        image: myregistry/simplest-lab:simplestlb
+        ports:
+        - containerPort: 80
+        env:
+        - name: APPLICATION_ALIAS
+          value: localhost
+        - name: APPLICATION_PORT
+          value: 3000      
+      - name: app
+        image: myregistry/simplest-lab:simplestapp
+        ports:
+        - containerPort: 3000
+        env:
+        - name: dbhost 
+          value: localhost
+        - name: dbname
+          value: demo
+        - name: dbuser
+          value: demo
+        - name: dbpasswd
+          value: d3m0     
+      - name: db
+        image: myregistry/simplest-lab:simplestdb
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          value: changeme
+        volumeMounts:
+        - name: db-data
+          mountPath: /scrub
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: simplestdb-data

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+  namespace: simplestlab  
+spec:
+  clusterIP: None
+  selector:
+    component: db
+    app: simplestlab
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432

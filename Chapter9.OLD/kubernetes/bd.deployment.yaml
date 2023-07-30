@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  labels:
+    component: db
+    app: simplestlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: db
+      app: simplestlab
+  template:
+    metadata:
+      labels:
+        component: db
+        app: simplestlab
+    spec:
+      containers:
+      - name: database
+        image: myregistry/simplest-lab:simplestdb
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          value: changeme
+        volumeMounts:
+        - name: db-data
+          mountPath: /data         
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: simplestdb-data
