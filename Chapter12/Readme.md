@@ -401,7 +401,7 @@ Take your time and review some of the deployed dashboards. You will learn a lot 
 
 We can use the Explore section (clicking on Explore button on the left main panel) to review the data retrieved from the configured datasources. This is usually the first point when we are trying to create a new dashboard.
 
-on the Explorer section, we will choose __local-prometheus__ as datasource to access all the data from this Prometheus-type datasource. We can include multiples datasources from the same type and select the appropriate ones on each dashboard or Explorer query.
+on the Explore section, we will choose __local-prometheus__ as datasource to access all the data from this Prometheus-type datasource. We can include multiples datasources from the same type and select the appropriate ones on each dashboard or Explorer query.
 
 ![Fig6](images/ch12-fig6.PNG)
 
