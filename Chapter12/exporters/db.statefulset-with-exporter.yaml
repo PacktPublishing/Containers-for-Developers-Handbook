@@ -34,8 +34,6 @@ spec:
         image: docker.io/frjaraur/simplestdb:1.0
         ports:
         - containerPort: 5432
-        # args: ["-c","sleep 1d"]
-        # command: ["/bin/sh"]
         env:
         - name: POSTGRES_PASSWORD
           valueFrom:
@@ -64,7 +62,7 @@ spec:
         image: quay.io/prometheuscommunity/postgres-exporter
         env:
         - name: DATA_SOURCE_URI
-          value: "postgresql://localhost:5432/postgres?sslmode=disable"
+          value: "localhost:5432?sslmode=disable"
         - name: DATA_SOURCE_USER
           value: postgres
         - name: DATA_SOURCE_PASS
@@ -89,7 +87,6 @@ spec:
       name: postgresdata
     spec:
       accessModes: [ "ReadWriteOnce" ]
-      #storageClassName: "csi-hostpath-sc"
       resources:
         requests:
           storage: 1Gi
