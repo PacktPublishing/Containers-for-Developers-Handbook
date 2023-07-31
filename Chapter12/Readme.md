@@ -233,7 +233,7 @@ Form the current PowerShell console, opened with administrator privileges, we ca
 Chapter12$ notepad c:\windows\system32\drivers\etc\hosts
 ```
 
-Get the IP address of your minikube host and add the following lines to your __hosts__ file (in my case, the minikue' IP address is 172.21.164.139):
+Get the IP address of your minikube host (__minikube ip__) and add the following lines to your __hosts__ file (in my case, the minikue' IP address is 172.21.164.139):
 ```
 172.21.164.139 simplestlab.local.lab
 172.21.164.139 grafana.local.lab
