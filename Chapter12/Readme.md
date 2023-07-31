@@ -436,7 +436,7 @@ If we close the Logs Volume section we can read all the logs of the __app__ comp
 ![Fig11](images/ch12-fig11.PNG)
 
 
-Let's go back to our lab and create a new dashboar. We will include metrics from CPU and memory consumption of the application's components as well as the logs from all its containers.
+Let's go back to our lab and create a new dashboard. We will include metrics from CPU and memory consumption of the application's components as well as the logs from all its containers.
 
 We wil go back to the Dashboards section and click on __New__ to create a new dashboard:
 
