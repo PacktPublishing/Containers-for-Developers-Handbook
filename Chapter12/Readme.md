@@ -395,7 +395,7 @@ These are the dashboards already present and configured (some of them may need s
 
 Some Kubernetes metrics are also shown, as we can see for example in the CoreDNS dashboard. This dashboard presents an overview of the current status of the CoreDNS internal DNS component.
 
-![Fig4](images/ch12-fig5.PNG)
+![Fig5](images/ch12-fig5.PNG)
 
 Take your time and review some of the deployed dashboards. You will learn a lot from these examples.
 
@@ -403,7 +403,7 @@ We can use the Explore section (clicking on Explore button on the left main pane
 
 on the Explorer section, we will choose __local-prometheus__ as datasource to access all the data from this Prometheus-type datasource. We can include multiples datasources from the same type and select the appropriate ones on each dashboard or Explorer query.
 
-![Fig4](images/ch12-fig6.PNG)
+![Fig6](images/ch12-fig6.PNG)
 
 Once the datasource is selected, we can review the metrics available by clicking in the __Metrics__ select box.
 
@@ -411,13 +411,13 @@ Once the datasource is selected, we can review the metrics available by clicking
 
 We have choosen for example the __container_cpu_usage_seconds_total__ metric  (you can write in the select box to search for metrics) and filter some specific labels such as the __namespace__, or even an specific __pod name__:
 
-![Fig4](images/ch12-fig7.PNG)
+![Fig7](images/ch12-fig7.PNG)
 
 Now the presented data is filtered by the fields selected.
 
 But we can use operations form the __Operation__ box to manipulate how the data is going to be presented. We can for example use Sum to integrate multiple samples and aggregate them by Pod:
 
-![Fig4](images/ch12-fig8.PNG)
+![Fig8](images/ch12-fig8.PNG)
 
 This timeseries gives a good approach of the current CPU consumption (time active in any CPU in seconds) of your application's Pods.
 
@@ -425,24 +425,111 @@ Let's choose a different datasource. If we change to Loki, the Explore interface
 
 We can use label filters too and create a custom query for our application's namespace for example. In the following screenshot we used the __component__  label:
 
-![Fig4](images/ch12-fig9.PNG)
+![Fig9](images/ch12-fig9.PNG)
 
-The simplestlab application has 
+In the simplestlab application, the backend component, __app__, has the __component__ label with __app__ value, hence we can retrieve all the streamed data for its containers by using this filter: 
 
-![Fig4](images/ch12-fig10.PNG)
+![Fig10](images/ch12-fig10.PNG)
 
-![Fig4](images/ch12-fig11.PNG)
+If we close the Logs Volume section we can read all the logs of the __app__ component in the select time range ("Last 1 hour").
 
-Let's go back to our lab
-
-## Adding the postgres exporter 
-https://github.com/prometheus-community/postgres_exporter
+![Fig11](images/ch12-fig11.PNG)
 
 
+Let's go back to our lab and create a new dashboar. We will include metrics from CPU and memory consumption of the application's components as well as the logs from all its containers.
+
+We wil go back to the Dashboards section and click on __New__ to create a new dashboard:
+
+![Fig12](images/ch12-fig12.PNG)
+
+We will click on __Add Visualization__ to add a new panel to an empty dashboard:
+![Fig13](images/ch12-fig13.PNG)
+
+We will choose a visualization of type Logs:
+
+![Fig14](images/ch12-fig14.PNG)
+
+And then we choose ___local-loki___ datasource and filter by the ___simplestlab___ __namespace__ label:
+
+![Fig15](images/ch12-fig15.PNG)
+
+And then click on __Apply__. We will then add a new panel clicking on Add button at the top-right of the dashboard page. This will add a new panel and start the process of creation again. This time we choose the ___local-prometheus___ datasource and select the ___container_memory_max_usage_bytes___ metric and filter by the ___simplestlab___ __namespace__ label again. We use bytes as Unit and represent the Sum operation by using the __pod__ label (Pod's name):
+
+![Fig16](images/ch12-fig16.PNG)
+
+And we follow the same process for the memory, but this time we will use the following query (use __Code__ format instead of __Builder__):
+```
+sum(rate(container_cpu_usage_seconds_total{namespace="simplestlab"}[5m])) by (pod)
+```
+The results will appear grouped by the Pod's name:
+
+![Fig17](images/ch12-fig17.PNG)
+
+And we just click Apply to add it to the application dashboard.
+
+We changed the panel's titles and then save the dashboard as SimplestLab.
+
+![Fig18](images/ch12-fig18.PNG)
+
+You finally have a very simple dashboard for your application, which can really help you to find any problem and allow you to have a clear idea of the limits required for your application's Pods.
+
+>NOTE: You may find a huge number of example dashboards at https://grafana.com/grafana/dashboards. Some of them can be used as they are, but others may need some small tweaks and customization to make them work on your environment.
+
+>NOTE: You can import a copy of the SimplestLab dashboard from the __dashboards__ directory on this Labs. For this, you just use the Add button and clieck on Import. The following page will appear and you just have to upload the [./dashboards/SimplestLab.dashboard.json](./dashboards/SimplestLab.dashboard.json) file.
+>
+>![Fig19](images/ch12-fig19.PNG)
+
+
+
+
+
+## Adding Prometheus Exporters to our application
+
+
+All the manifests for this part of the lab are included in the __exporters__ directory.
+
+
+### 1 - Adding the postgres exporter
+
+
+We will use the Postgres Exporter from Prometheus Community, 
+https://github.com/prometheus-community/postgres_exporter.
+
+It is packaged and prepared to use in the __quay.io/prometheuscommunity/postgres-exporter__ container image. We will include it as a sidecar container in our database component's manifest. But we need to also include few environment variables to make it work:
+```
+      - name: postgres-exporter
+        image: quay.io/prometheuscommunity/postgres-exporter
+        env:
+        - name: DATA_SOURCE_URI
+          value: "localhost:5432?sslmode=disable"
+        - name: DATA_SOURCE_USER
+          value: postgres
+        - name: DATA_SOURCE_PASS
+          valueFrom:
+            secretKeyRef:
+              name: dbcredentials
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 9187
+        readinessProbe:
+          tcpSocket:
+            port: 9187
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 9187
+          initialDelaySeconds: 15
+          periodSeconds: 20 
+```
+
+We can easily replace the current StatefulSet with the new manifest  [./exporters/db.statefulset-with-exporter.yaml](./exporters/db.statefulset-with-exporter.yaml) file.
+```
 Chapter12$ kubectl replace -f .\exporters\db.statefulset-with-exporter.yaml
 statefulset.apps/db replaced
-
-
+```
+After few seconds, we can see that now we have two containers (the app components may fall down because the database's Pod was recreated)
+```
 Chapter12$ kubectl get pods -n simplestlab -o wide
 NAME                  READY   STATUS    RESTARTS      AGE    IP               NODE       NOMINATED NODE   READINESS GATES
 app-b6bbb5f6c-2x8tv   0/1     Running   2 (47s ago)   155m   10.244.120.83    minikube   <none>           <none>
@@ -450,8 +537,10 @@ app-b6bbb5f6c-w9qt2   0/1     Running   2 (47s ago)   155m   10.244.120.85    mi
 app-b6bbb5f6c-wwwrq   0/1     Running   2 (47s ago)   155m   10.244.120.84    minikube   <none>           <none>
 db-0                  2/2     Running   0             46s    10.244.120.116   minikube   <none>           <none>
 lb-xtg7q              1/1     Running   0             155m   10.244.120.81    minikube   <none>           <none>
+```
 
-
+The exporter will expose its metrics in port 9187. To verify the access to the new metrics, you can try to reach the Pod's port 9187 from the __lb__ component's Pod.
+```
 Chapter12$ kubectl exec -ti lb-xtg7q -n simplestlab -- /bin/sh
 / $ curl 10.244.120.115:9187
 <html lang="en">
@@ -498,6 +587,10 @@ label {
     </main>
   </body>
 </html>
+```
+
+And directly, the metrics:
+```
 / $ curl 10.244.120.115:9187/metrics
 # HELP go_gc_duration_seconds A summary of the pause duration of garbage collection cycles.
 # TYPE go_gc_duration_seconds summary
@@ -522,6 +615,13 @@ postgres_exporter_build_info{branch="HEAD",goarch="amd64",goos="linux",goversion
 promhttp_metric_handler_requests_total{code="503"} 0
 / $ exit
 command terminated with exit code 130
+```
+
+
+
+
+
+
 
 Chapter12$ kubectl replace -f .\exporters\db.service-with-exporter.yaml
 service/db replaced
