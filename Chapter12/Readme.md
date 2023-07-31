@@ -489,7 +489,7 @@ You finally have a very simple dashboard for your application, which can really 
 All the manifests for this part of the lab are included in the __exporters__ directory.
 
 
-### 1 - Adding the postgres exporter
+### 1 - Adding the Postgres Exporter
 
 
 We will use the Postgres Exporter from Prometheus Community, 
@@ -497,6 +497,7 @@ https://github.com/prometheus-community/postgres_exporter.
 
 It is packaged and prepared to use in the __quay.io/prometheuscommunity/postgres-exporter__ container image. We will include it as a sidecar container in our database component's manifest. But we need to also include few environment variables to make it work:
 ```
+...
       - name: postgres-exporter
         image: quay.io/prometheuscommunity/postgres-exporter
         env:
@@ -520,7 +521,8 @@ It is packaged and prepared to use in the __quay.io/prometheuscommunity/postgres
           tcpSocket:
             port: 9187
           initialDelaySeconds: 15
-          periodSeconds: 20 
+          periodSeconds: 20
+... 
 ```
 
 We can easily replace the current StatefulSet with the new manifest  [./exporters/db.statefulset-with-exporter.yaml](./exporters/db.statefulset-with-exporter.yaml) file.
@@ -617,37 +619,267 @@ promhttp_metric_handler_requests_total{code="503"} 0
 command terminated with exit code 130
 ```
 
+But now we need a Service resource to export correctly the data into the Kubernetes cluster (we are not using any NetworkPolicy resource on these labs).
+We add the new port to the existent db Service resource [./exporters/db.service-with-exporter.yaml](./exporters/db.service-with-exporter.yaml) :
+```
+...
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+      name: db
+    - protocol: TCP
+      port: 9187
+      targetPort: 9187
+      name: exporter
+...
+```
 
-
-
-
-
-
+And we replace the current db Service resource:
+```
 Chapter12$ kubectl replace -f .\exporters\db.service-with-exporter.yaml
 service/db replaced
+```
 
+Now it's time to prepare a ServiceMonitor resource. But first let's verify which namespaces and labels is the Prometheus Operator lookuing for ServiceMonitor resources:
+```
+Chapter12$ kubectl get Prometheus -n monitoring
+NAME                               VERSION   DESIRED   READY   RECONCILED   AVAILABLE   AGE
+kube-prometheus-stack-prometheus   v2.45.0   1         1       True         True        25h
+Chapter12$ kubectl get Prometheus -n monitoring  kube-prometheus-stack-prometheus
+NAME                               VERSION   DESIRED   READY   RECONCILED   AVAILABLE   AGE
+kube-prometheus-stack-prometheus   v2.45.0   1         1       True         True        25h
+Chapter12$ kubectl get Prometheus -n monitoring  kube-prometheus-stack-prometheus -o yaml
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  annotations:
+    meta.helm.sh/release-name: kube-prometheus-stack
+    meta.helm.sh/release-namespace: monitoring
+  creationTimestamp: "2023-07-30T15:37:04Z"
+  generation: 1
+  labels:
+    app: kube-prometheus-stack-prometheus
+    app.kubernetes.io/instance: kube-prometheus-stack
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/part-of: kube-prometheus-stack
+    app.kubernetes.io/version: 48.2.2
+    chart: kube-prometheus-stack-48.2.2
+    heritage: Helm
+    release: kube-prometheus-stack
+  name: kube-prometheus-stack-prometheus
+  namespace: monitoring
+  resourceVersion: "18526"
+  uid: c206dc6b-910e-4038-ba6a-ae78a5bf8639
+spec:
+  enableAdminAPI: false
+  evaluationInterval: 30s
+  externalUrl: http://kube-prometheus-stack-prometheus.monitoring:9090
+  hostNetwork: false
+  image: quay.io/prometheus/prometheus:v2.45.0
+  listenLocal: false
+  logFormat: logfmt
+  logLevel: info
+  paused: false
+  podMonitorNamespaceSelector: {}
+  podMonitorSelector:
+    matchLabels:
+      release: kube-prometheus-stack
+  portName: http-web
+  probeNamespaceSelector: {}
+  probeSelector:
+    matchLabels:
+      release: kube-prometheus-stack
+  replicas: 1
+  retention: 10d
+  routePrefix: /
+  ruleNamespaceSelector: {}
+  ruleSelector:
+    matchLabels:
+      release: kube-prometheus-stack
+  scrapeConfigNamespaceSelector: {}
+  scrapeConfigSelector:
+    matchLabels:
+      release: kube-prometheus-stack
+  scrapeInterval: 30s
+  securityContext:
+    fsGroup: 2000
+    runAsGroup: 2000
+    runAsNonRoot: true
+    runAsUser: 1000
+    seccompProfile:
+      type: RuntimeDefault
+  serviceAccountName: kube-prometheus-stack-prometheus
+  serviceMonitorNamespaceSelector: {}
+  serviceMonitorSelector:
+    matchLabels:
+      release: kube-prometheus-stack
+  shards: 1
+  tsdb:
+    outOfOrderTimeWindow: 0s
+  version: v2.45.0
+  walCompression: true
+status:
+  availableReplicas: 1
+  conditions:
+  - lastTransitionTime: "2023-07-31T10:38:19Z"
+    observedGeneration: 1
+    status: "True"
+    type: Available
+  - lastTransitionTime: "2023-07-31T10:38:19Z"
+    observedGeneration: 1
+    status: "True"
+    type: Reconciled
+  paused: false
+  replicas: 1
+  shardStatuses:
+  - availableReplicas: 1
+    replicas: 1
+    shardID: "0"
+    unavailableReplicas: 0
+    updatedReplicas: 1
+  unavailableReplicas: 0
+  updatedReplicas: 1
+Chapter12$
+```
 
+As we can see from the above Kubernetes Prometheus resource, this Prometheus instance is looking for ServiceMonitors on any namespace, but they must include release=kube-prometheus-stack label to be managed by this Prometheus server:
+
+```
+...
+  serviceMonitorNamespaceSelector: {}
+  serviceMonitorSelector:
+    matchLabels:
+      release: kube-prometheus-stack
+...
+```
+
+Then, we can create our own ServiceMonitor resource for the db application's component adding the release=kube-prometheus-stack label, as we can see int the  [./exporters/db.serviceMonitor.yaml](./exporters/db.serviceMonitor.yaml) file:
+```
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    component: db
+    app: simplestlab
+    release: kube-prometheus-stack
+  name: db
+  namespace: simplestlab
+spec:
+  endpoints:
+  - path: /metrics
+    port: exporter
+    interval: 30s
+  # namespaceSelector:
+  #   matchNames:
+  #   - simplestlab
+  jobLabel: jobLabel
+  selector:
+    matchLabels:
+      component: db
+      app: simplestlab
+```
+We defined in the ServiceMonitor which Service resources will be accessed (all the Services with ___component=db and app=simplestlab___ labels), in which port (___exporter => 9187___), which path to use to retrieve its metrics (___/metrics___). We now create this new resource:
+```
 Chapter12$ kubectl create -f .\exporters\db.serviceMonitor.yaml
 servicemonitor.monitoring.coreos.com/db created
+```
 
-
+And now we can use port-forwarding to verify the metrics in Prometheus: 
+```
 Chapter12$ kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090
 Forwarding from 127.0.0.1:9090 -> 9090
 Forwarding from [::1]:9090 -> 9090
+```
+And we can connect to the Prometheus service using http://localhost:9090:
+
+![Fig20](images/ch12-fig20.PNG)
 
 
+The new Postgres metrics are avialable. You may need to wait a minute to be able to verify the Postgres metrics, because the interval for scrapping defined in the ServiceMonitor is 30s.
 
-## Nginx Exporter
+### 2 - Adding the Nginx exporter
+In this case, will use the Nginx Exporter from Nginx Inc, the product vendor and supporter, https://github.com/nginxinc/nginx-prometheus-exporter.
 
-https://github.com/nginxinc/nginx-prometheus-exporter
+It is packaged and prepared to use in the __nginx/nginx-prometheus-exporter__ container image. We will include it as a sidecar container, as we already did with the database component. But this time, we need to change the Nginx configuration because we need to expose the internal statistics feature (stub_status). For this to work, we will change our application ___lb-config___ ConfigMap, which defines the __nginx.conf__ file.
 
+This is the content for the new ___lb-config___ ConfigMap, included in the [./exporters/lb.configmap-with-exporter.yaml](./exporters/lb.configmap-with-exporter.yaml) manifest file:
 
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lb-config
+  labels:
+    component: lb
+    app: simplestlab
+  namespace: simplestlab
+data: 
+  nginx.conf: |
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /tmp/nginx/error.log warn;
+    pid        /tmp/nginx/nginx.pid;
+
+    events { 
+      worker_connections  1024; 
+    }
+
+    http { 
+      server {
+        listen 8080; # specify a port higher than 1024 if running as non-root user 
+        location /healthz { 
+            add_header Content-Type text/plain;
+            return 200 'OK';
+        } 
+        location / {
+          proxy_pass http://app:3000;
+        }   
+      }
+      server {
+        listen 8081;
+        location = /stub_status {
+            stub_status;
+        }
+      }
+    }
+
+```
+
+Notice that we added a new server on port 8081 to expose the Nginx metrics. This server will be accessed by the Nginx Exporter, which will manage the staticstics and expose the metrics in a new port. The port 8081 will only be accessible internally, we will not define a port in the Service resource to access it.
+
+We will first replace the ___lb___ component's ConfigMap:
+```
 Chapter12$ kubectl replace -f .\exporters\lb.configmap-with-exporter.yaml
 configmap/lb-config replaced
+```
+And now we have to include a sidecar container to run the Nginx Exporter. This is an extract of the [./exporters/lb.daemonset-with-exporter.yaml](./exporters/lb.daemonset-with-exporter.yaml) file:
 
+```
+...
+      - name: exporter
+        image: nginx/nginx-prometheus-exporter:0.10.0
+        args:
+        - -nginx.scrape-uri=http://localhost:8081/stub_status
+        ports: 
+        - containerPort: 9113
+        securityContext:
+          readOnlyRootFilesystem: true
+...
+
+```
+
+The Nginx Exporter will be exposed in 9113 port. Notice that we defined ___-nginx.scrape-uri=http://localhost:8081/stub_status___ argument to specify which Nginx instance to monitor, including the path and port where the statistics will be available (___http://localhost:8081/stub_status___). 
+
+Now, we can replace the current ___lb___ DaemonSet:
+```
 Chapter12$ kubectl replace -f .\exporters\lb.daemonset-with-exporter.yaml
 daemonset.apps/lb replaced
+```
 
+And we can verify that our ___lb___ Pod now runs two containers:
+```
 Chapter12$ kubectl get pods -n simplestlab
 NAME                  READY   STATUS    RESTARTS        AGE
 app-b6bbb5f6c-2x8tv   1/1     Running   6 (11m ago)     19h
@@ -655,27 +887,77 @@ app-b6bbb5f6c-w9qt2   1/1     Running   7 (8m52s ago)   19h
 app-b6bbb5f6c-wwwrq   1/1     Running   7 (8m48s ago)   19h
 db-0                  2/2     Running   0               11m
 lb-sjwrd              2/2     Running   0               8s
+```
 
+We need a Service resource which expose the Nginx Exporter metrics. We can always create a separated Service resource for the metrics, but usually it is simpler to add the new exporter port to the application's component Service resource [./exporters/lb.service-with-exporter.yaml](./exporters/lb.service-with-exporter.yaml):
+```
+...
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+      name: lb
+    - protocol: TCP
+      port: 9113
+      targetPort: 9113
+      name: exporter
+...
+```
+We replace the old Service resource with the new definition:
+
+```
 Chapter12$ kubectl replace -f .\exporters\lb.service-with-exporter.yaml
 service/lb replaced
+```
+And now we can create the new ServiceMonitor [./exporters/lb.serviceMonitor.yaml](./exporters/lb.serviceMonitor.yaml):
 
+```
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    component: lb
+    app: simplestlab
+    release: kube-prometheus-stack
+  name: lb
+  namespace: simplestlab
+spec:
+  endpoints:
+  - path: /metrics
+    port: exporter
+    interval: 30s
+  # namespaceSelector:
+  #   matchNames:
+  #   - simplestlab
+  jobLabel: jobLabel
+  selector:
+    matchLabels:
+      component: lb
+      app: simplestlab
+
+```
+And we create this new resource:
+```
 Chapter12$ kubectl create -f .\exporters\lb.serviceMonitor.yaml
 servicemonitor.monitoring.coreos.com/lb created
+```
 
-
+We can now use again the port-forward feature to publish the Prometheus GUI at http://localhost:9090
+```
 Chapter12$ kubectl port-forward -n monitoring svc/kube-prometheus-stack-prometheus 9090:9090
 Forwarding from 127.0.0.1:9090 -> 9090
 Forwarding from [::1]:9090 -> 9090
+```
 
-Fig20
-![Fig20](images/ch12-fig20.PNG)
-
-
+If we go to the __Targets__ section we will see the new ServiceMonitors' Endpoints. They must be UP for the metrics to be available:
 ![Fig21](images/ch12-fig21.PNG)
 
+And now, in the __Graphs__ section, we can verify the Nginx Exporter metrics available:
+![Fig22](images/ch12-fig22.PNG)
 
 
 
+In these labs we learned to prepare a fully working monitoring and Logging environment, then create an application dashboard, with information from different sources, and finally, add new metrics using application's components exporters. You are now ready to even create your own application exporter (https://prometheus.io/docs/instrumenting/writing_exporters/). 
 
 
 ## Remove the Minikube environment
