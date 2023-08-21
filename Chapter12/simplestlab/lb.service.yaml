@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: lb
+  namespace: simplestlab
+  labels:
+    component: lb
+    app: simplestlab
+spec:
+  type: ClusterIP
+  selector:
+    app: simplestlab
+    component: lb
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080

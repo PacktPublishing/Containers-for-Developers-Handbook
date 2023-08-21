@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Statefulset
+metadata:
+  name: db
+  labels:
+    component: db
+    app: simplestlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: db
+      app: simplestlab
+  template:
+    metadata:
+      labels:
+        component: db
+        app: simplestlab
+    spec:
+      containers:
+      - name: database
+        image: myregistry/simplest-lab:simplestdb
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          value: changeme
+        volumeMounts:
+        - name: db-data
+          mountPath: /data
+
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      #storageClassName: "my-storage-class" # We will use Minikube's default storage class
+      resources:
+        requests:
+          storage: 1Gi 
+
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: simplestdb-data

@@ -1,0 +1,47 @@
+alertmanager:
+  enabled: false
+
+grafana:
+  enabled: true
+  ingress:
+    enabled: true
+    ingressClassName: nginx
+    hosts:
+    - grafana.local.lab
+  sidecar:
+    datasources:
+      enabled: true
+      alertmanager:
+        enabled: false
+      defaultDatasourceEnabled: false
+  # deleteDatasources:
+  # - name: Alertmanager
+  #   orgId: 1
+  # - name: Prometheus
+  #   orgId: 1
+  additionalDataSources:
+  - name: local-prometheus
+    editable: true
+    jsonData:
+        tlsSkipVerify: true
+    orgId: 1
+    type: prometheus
+    url: http://prometheus-operated:9090
+    version: 1
+
+  - name: local-loki
+    editable: true
+    jsonData:
+        tlsSkipVerify: true
+    orgId: 1
+    type: loki
+    url: http://loki-gateway.logging.svc:80
+    version: 1
+
+# prometheus:
+#   serviceMonitor:
+#     additionalScrapeConfigs:
+#     - job_name: postgres
+#       static_configs:
+#       - targets:
+#         - db.simplestlab.svc:9187
