@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lb
+  labels:
+    component: lb
+    app: simplestlab
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: lb
+      app: simplestlab
+  template:
+    metadata:
+      labels:
+        component: lb
+        app: simplestlab
+    spec:
+      containers:
+      - name: loadbalancer
+        image: myregistry/simplest-lab:simplestlb
+        ports:
+        - containerPort: 80
+        env:
+        - name: APPLICATION_ALIAS
+          value: simplestapp
+        - name: APPLICATION_PORT
+          value: 3000      

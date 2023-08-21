@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+  labels:
+    component: db
+    app: simplestlab
+  namespace: simplestlab    
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: db
+      app: simplestlab
+  template:
+    metadata:
+      labels:
+        component: db
+        app: simplestlab
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10000
+        runAsGroup: 10000
+        fsGroup: 10000
+        fsGroupChangePolicy: OnRootMismatch
+      volumes:
+      - name: initdb-secret
+        secret:
+          secretName: initdb
+          optional: true
+      containers:
+      - name: database
+        image: docker.io/frjaraur/simplestdb:1.0
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: dbcredentials
+              key: POSTGRES_PASSWORD
+        - name: PGDATA
+          value: /data/postgres
+        volumeMounts:
+        - name: postgresdata
+          mountPath: /data
+        - name: initdb-secret
+          mountPath: "/docker-entrypoint-initdb.d/"
+          readOnly: true
+        readinessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 5432
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      - name: postgres-exporter
+        image: quay.io/prometheuscommunity/postgres-exporter
+        env:
+        - name: DATA_SOURCE_URI
+          value: "localhost:5432?sslmode=disable"
+        - name: DATA_SOURCE_USER
+          value: postgres
+        - name: DATA_SOURCE_PASS
+          valueFrom:
+            secretKeyRef:
+              name: dbcredentials
+              key: POSTGRES_PASSWORD
+        ports:
+        - containerPort: 9187
+        readinessProbe:
+          tcpSocket:
+            port: 9187
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 9187
+          initialDelaySeconds: 15
+          periodSeconds: 20              
+  volumeClaimTemplates:
+  - metadata:
+      name: postgresdata
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi

@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: lb
+  labels:
+    component: lb
+    app: simplestlab
+  namespace: simplestlab    
+spec:
+  selector:
+    matchLabels:
+      component: lb
+      app: simplestlab
+  template:
+    metadata:
+      labels:
+        component: lb
+        app: simplestlab
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        runAsGroup: 101
+      containers:
+      - name: loadbalancer
+        # args: ["-c","sleep INF"]
+        # command: ["/bin/sh"]
+        securityContext:
+          readOnlyRootFilesystem: true
+        image: docker.io/nginx:alpine
+        ports: 
+        - containerPort: 8080
+        securityContext:
+          readOnlyRootFilesystem: true
+        volumeMounts: 
+        - name: cache
+          mountPath: /var/cache/nginx
+        - name: tmp
+          mountPath: /tmp/nginx
+        - name: conf 
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+      volumes: 
+      - name: cache
+        emptyDir: {}
+      - name: tmp
+        emptyDir: {} 
+      - name: conf
+        configMap: 
+          name: lb-config
+

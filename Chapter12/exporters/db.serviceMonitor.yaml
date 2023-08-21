@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    component: db
+    app: simplestlab
+    release: kube-prometheus-stack
+  name: db
+  namespace: simplestlab
+spec:
+  endpoints:
+  - path: /metrics
+    port: exporter
+    interval: 30s
+  # namespaceSelector:
+  #   matchNames:
+  #   - simplestlab
+  jobLabel: jobLabel
+  selector:
+    matchLabels:
+      component: db
+      app: simplestlab
