@@ -1,0 +1,12 @@
+dependencies:
+- name: simplestlab-db
+  repository: file://../simplestlab-db
+  version: 1.0.0
+- name: simplestlab-app
+  repository: file://../simplestlab-app
+  version: 1.0.0
+- name: simplestlab-lb
+  repository: file://../simplestlab-lb
+  version: 1.0.0
+digest: sha256:9e6369ed846ce945efdb87a7647d10825b3f973bd1d3eac55c55856b1c70ba1f
+generated: "2023-08-17T10:41:52.607239225+02:00"
