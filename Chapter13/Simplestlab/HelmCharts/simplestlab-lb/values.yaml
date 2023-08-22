@@ -1,0 +1,65 @@
+image:
+  repository: docker.io/nginx
+  pullPolicy: IfNotPresent
+  tag: "alpine"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 101
+  runAsGroup: 101
+
+securityContext:
+  readOnlyRootFilesystem: true
+
+service:
+  type: ClusterIP
+  port: 80
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+nginxConfig: |
+    user  nginx;
+    worker_processes  auto;
+
+    error_log  /tmp/nginx/error.log warn;
+    pid        /tmp/nginx/nginx.pid;
+
+    events { 
+      worker_connections  1024; 
+    }
+
+    http { 
+      server {
+        listen 8080; # specify a port higher than 1024 if running as non-root user 
+        location /healthz { 
+            add_header Content-Type text/plain;
+            return 200 'OK';
+        } 
+        location / {
+          proxy_pass http://app:3000;
+        }   
+      }
+    }

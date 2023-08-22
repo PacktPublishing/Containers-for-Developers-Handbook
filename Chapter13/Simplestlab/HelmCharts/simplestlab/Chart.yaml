@@ -1,0 +1,28 @@
+apiVersion: v2
+name: simplestlab
+description: SimplestLab FULL STACK Helm chart for Kubernetes
+
+type: application
+
+version: 1.0.0
+
+appVersion: "1.0.0"
+
+dependencies:
+  - name: simplestlab-db
+    version: 1.0.0
+    #repository:  oci://myregistry/projectgroup/helmcharts/simplestlab-db
+    #repository: "file://../simplestlab-db" # LOCAL for testing locally
+    repository: oci://registry.172.31.255.254.nip.io/simplestlab/helmcharts/simplestlab-db
+  - name: simplestlab-app
+    version: 1.0.0
+    #repository:  oci://myregistry/projectgroup/helmcharts/simplestlab-app
+    #repository: "file://../simplestlab-app" # LOCAL for testing locally
+    repository: oci://registry.172.31.255.254.nip.io/simplestlab/helmcharts/simplestlab-app
+
+  - name: simplestlab-lb
+    version: 1.0.0
+    #repository:  oci://myregistry/projectgroup/helmcharts/simplestlab-lb
+    #repository: "file://../simplestlab-lb" # LOCAL for testing locally
+    repository: oci://registry.172.31.255.254.nip.io/simplestlab/helmcharts/simplestlab-lb
+
