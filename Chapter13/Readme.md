@@ -430,6 +430,21 @@ We can now access GitLab using our browser and openning https://gitlab.172.31.25
 IMAGE
 
 
+## Include GitLab registry CA inside Minikube
+This workaround will help us to avoid certificate issues when Minikube's Kubernetes try to pull images from the GitLab registry:
+```
+Chapter13$ minikube ssh  
+docker@minikube:~$ sudo mkdir /etc/docker/certs.d/registry.172.31.255.254.nip.io
+docker@minikube:~$ openssl s_client -connect registry.172.31.255.254.nip.io:443 -showcerts </dev/null 2>/dev/null | openssl x509 -outform PEM |sudo  tee /etc/docker/certs.d/registry.172.31.255.254.nip.io/registry.172.31.255.254.nip.io.crt
+docker@minikube:~$  ls /etc/docker/certs.d/registry.172.31.255.254.nip.io/
+registry.172.31.255.254.nip.io.crt
+
+docker@minikube:~$ exit
+```
+
+
+
+
 ## ArgoCD Installation
 
 We have prepared for you a script that generates a valid values YAML file for the installation of ArgoCD. Ensure you have MINIKUBEIP variable set.
