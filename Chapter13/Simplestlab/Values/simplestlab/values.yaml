@@ -58,10 +58,10 @@ simplestlab-app:
   replicaCount: 1
   envVariables:
   # Never use clear values. This file is stored in GitLab. Use Sealed Secrets to encrypt and use here the encrypted values.
-    #dbhost: db
+    dbhost: db
     ###################################
     ## First Test Update -- Change the value of this key
-    dbhost: simplestlab-simplestlab-db
+    #dbhost: simplestlab-simplestlab-db
     ####################################
     dbname: demo
     dbpasswd: d3m0
@@ -82,27 +82,27 @@ simplestlab-lb:
     port: 8080
   ##################################
   # Second Test Update -- Uncomment whti section
-  nginxConfig: |
-    user  nginx;
-    worker_processes  auto;
-    error_log  /tmp/nginx/error.log warn;
-    pid        /tmp/nginx/nginx.pid;
+  # nginxConfig: |
+  #   user  nginx;
+  #   worker_processes  auto;
+  #   error_log  /tmp/nginx/error.log warn;
+  #   pid        /tmp/nginx/nginx.pid;
 
-    events { 
-      worker_connections  1024; 
-    }
+  #   events { 
+  #     worker_connections  1024; 
+  #   }
 
-    http { 
-      server {
-        listen 8080;
-        location /healthz { 
-          add_header Content-Type text/plain;
-          return 200 'OK';
-        } 
-        location / {
-          proxy_pass http://simplestlab-simplestlab-app:3000;
-        }   
-      }
-    }
-
+  #   http { 
+  #     server {
+  #       listen 8080;
+  #       location /healthz { 
+  #         add_header Content-Type text/plain;
+  #         return 200 'OK';
+  #       } 
+  #       location / {
+  #         proxy_pass http://simplestlab-simplestlab-app:3000;
+  #       }   
+  #     }
+  #   }
+  #
   ###################################
