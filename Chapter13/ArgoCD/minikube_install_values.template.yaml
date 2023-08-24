@@ -1,0 +1,36 @@
+################ Install Instructions ###################
+# Using Helm Chart Remote Repository:
+#
+# helm repo add argo https://argoproj.github.io/argo-helm
+# helm repo update
+# helm upgrade --install argocd argo/argo-cd --namespace argocd --create-namespace --values minikube_install_values.yaml
+#
+# Using GitHub Repository tar.gz Helm Chart package:
+#
+# helm upgrade --install argocd argo-cd-5.43.5.tgz --namespace argocd --create-namespace --values minikube_install_values.yaml
+#
+###########################################################
+server:
+  ingressClassName: nginx
+  ingress:
+    enabled: true
+    hosts:
+    - argocd.MINIKUBEIP.nip.io
+  extraArgs:
+  - --insecure
+  env:
+  - name: SSL_CERT_DIR
+    value: "/app/config/tls/"
+configs:
+  tls:
+    certificates:
+      gitlab.172.25.121.130.nip.io: |
+        GITLABCA
+
+      registry.172.25.121.130.nip.io: |
+        GITLABCA
+
+
+
+
+

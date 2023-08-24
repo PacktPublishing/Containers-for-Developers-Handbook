@@ -6,4 +6,4 @@ metadata:
     {{- include "simplestlab-lb.labels" . | nindent 4 }}
 data: 
   nginx.conf: |
-{{ .Values.nginxConfig | indent 4}}}}
+{{ .Values.nginxConfig | indent 4}}

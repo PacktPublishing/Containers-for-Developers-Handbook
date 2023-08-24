@@ -1,0 +1,52 @@
+################ Install Instructions ###################
+# Using Helm Chart Remote Repository:
+#
+# helm repo add gitlab https://charts.gitlab.io/
+# helm repo update
+# helm upgrade --install gitlab gitlab/gitlab --timeout 600s --namespace gitlab --create-namespace --values minikube_install_values.yaml
+#
+# Using GitHub Repository tar.gz Helm Chart package:
+#
+# helm upgrade --install gitlab gitlab-7.2.4.tgz --timeout 600s --namespace gitlab --create-namespace  --values minikube_install_values.yaml
+#
+###########################################################
+
+
+global:
+  ingress:
+    configureCertmanager: false
+    class: "nginx"
+  hosts:
+    domain: 172.31.255.254.nip.io
+    externalIP: 172.31.255.254
+  rails:
+    bootsnap:
+      enabled: false
+  shell:
+    port: 32022
+certmanager:
+  install: false
+nginx-ingress:
+  enabled: false
+prometheus:
+  install: false
+gitlab-runner:
+  install: true
+  certsSecretName: gitlab-wildcard-tls-chain
+gitlab:
+  webservice:
+    minReplicas: 1
+    maxReplicas: 1
+  sidekiq:
+    minReplicas: 1
+    maxReplicas: 1
+  gitlab-shell:
+    minReplicas: 1
+    maxReplicas: 1
+    service:
+      type: NodePort
+      nodePort: 32022
+registry:
+  hpa:
+    minReplicas: 1
+    maxReplicas: 1
