@@ -1,0 +1,87 @@
+# helm upgrade --install argocd argo/argo-cd --namespace argocd --create-namespace --values minikube_install_values.yaml
+server:
+  ingressClassName: nginx
+  ingress:
+    enabled: true
+    hosts:
+    - argocd.172.31.255.254.nip.io
+  extraArgs:
+  - --insecure
+  env:
+  - name: SSL_CERT_DIR
+    value: "/app/config/tls/"
+configs:
+  tls:
+    certificates:
+      gitlab.172.25.121.130.nip.io: |
+        -----BEGIN CERTIFICATE-----
+        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
+        X7LTPHXP84yGqwGOZIejLw==
+        -----END CERTIFICATE-----
+
+
+      registry.172.25.121.130.nip.io: |
+        -----BEGIN CERTIFICATE-----
+        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
+        X7LTPHXP84yGqwGOZIejLw==
+        -----END CERTIFICATE-----
+
+
+
+
+
+

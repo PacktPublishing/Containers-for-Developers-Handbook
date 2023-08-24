@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: minikube-simplestlab
+  namespace: argocd
+spec:
+  destination:
+    name: minikube
+    namespace: simplestlab
+  project: simplestlab
+  sources:
+  - chart: simplestlab
+    helm:
+      releaseName: simplestlab
+      valueFiles:
+      - $values/values.yaml
+    repoURL: docker.io/frjaraur
+    #repoURL: registry.172.31.255.254.nip.io/simplestlab/helmcharts/simplestlab
+    targetRevision: 1.0.0
+  - ref: values
+    repoURL: https://gitlab.172.31.255.254.nip.io/simplestlab/values/simplestlab.git
+    targetRevision: main

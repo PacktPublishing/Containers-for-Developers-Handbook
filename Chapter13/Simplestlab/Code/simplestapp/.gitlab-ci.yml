@@ -1,0 +1,70 @@
+stages:
+ - test
+ - security
+ - build
+
+.common-build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.1-debug
+    entrypoint: [""]
+  variables:
+    IMAGE: "$CI_REGISTRY_IMAGE:dev"
+  before_script:
+    - printf '%s\n' "${LABS_LOCAL_GITLAB_CERTIFICATE}" |sed 's/- /-\n/g; s/ -/\n-/g' | sed '/CERTIFICATE/! s/ /\n/g' >> /kaniko/ssl/certs/ca-certificates.crt
+
+
+.release-build:
+  stage: build
+  image:
+    name: gcr.io/kaniko-project/executor:v1.9.1-debug
+    entrypoint: [""]
+  variables:
+    IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+  before_script:
+    - printf '%s\n' "${LABS_LOCAL_GITLAB_CERTIFICATE}" |sed 's/- /-\n/g; s/ -/\n-/g' | sed '/CERTIFICATE/! s/ /\n/g' >> /kaniko/ssl/certs/ca-certificates.crt
+    - export RELEASE_REGISTRY_IMAGE="$(echo $CI_REGISTRY_IMAGE|sed -e "s|/code/|/images/|g" )"
+    - export RELEASE_IMAGE="$RELEASE_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$PROJECTGROUP_USER\",\"password\":\"$PROJECTGROUP_PASSWORD\"}}}" > /kaniko/.docker/config.json
+
+validate-dockerfile:
+  stage: test
+  image:
+    name: docker.io/hadolint/hadolint:v2.12.0-alpine
+  script:
+    - hadolint "${CI_PROJECT_DIR}/Dockerfile"
+
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+
+trivy-scan:
+  stage: security
+  image:
+    name: docker.io/aquasec/trivy:latest
+    entrypoint: [""]
+  script:
+    - trivy fs --no-progress --scanners vuln,secret,config ${CI_PROJECT_DIR}
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
+
+build:
+  stage: build
+  extends: .common-build
+  script:
+    - /kaniko/executor
+     --context "${CI_PROJECT_DIR}"
+     --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+     --destination "${IMAGE}"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+
+build-release:
+  stage: build
+  extends: .release-build
+  script:
+    - /kaniko/executor
+     --context "${CI_PROJECT_DIR}"
+     --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+     --destination "${RELEASE_IMAGE}"
+  rules:
+    - if: '$CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'

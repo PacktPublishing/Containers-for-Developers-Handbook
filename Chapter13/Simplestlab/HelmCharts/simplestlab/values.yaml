@@ -17,6 +17,7 @@ ingress:
 
 service:
   port: 80
+  name: frontend
 
 simplestlab-db:
   image:

@@ -1,4 +1,3 @@
-
 ingress:
   enabled: true
   className: "nginx"
@@ -6,7 +5,7 @@ ingress:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: simplestlab.172.31.255.254
+    - host: simplestlab.172.31.255.254.nip.io
       paths:
         - path: /
           pathType: ImplementationSpecific
@@ -16,8 +15,8 @@ ingress:
   #      - chart-example.local
 
 service:
-  port: 80
-
+  port: 8080
+  name: simplestlab-simplestlab-lb
 
 simplestlab-db:
   image:
@@ -53,20 +52,20 @@ simplestlab-db:
 
 simplestlab-app:
   image:
-    repository: registry.172.18.158.255.nip.io/simplestlab/images/simplestapp
-    pullPolicy: IfNotPresent
-    tag: "1.0"
+    repository: registry.172.31.255.254.nip.io/simplestlab/images/simplestapp
+    pullPolicy: Always
+    tag: "1.0.0"
   replicaCount: 1
   envVariables:
   # Never use clear values. This file is stored in GitLab. Use Sealed Secrets to encrypt and use here the encrypted values.
-    dbhost: db
+    #dbhost: db
     ###################################
     ## First Test Update -- Change the value of this key
-    #dbhost: simplestlab-simplestlab-db
+    dbhost: simplestlab-simplestlab-db
     ####################################
-    dbname: demo-test
+    dbname: demo
     dbpasswd: d3m0
-    dbuser: demo-test
+    dbuser: demo
   autoscaling:
     enabled: false
     minReplicas: 1
@@ -74,37 +73,36 @@ simplestlab-app:
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
-simplest-lb:
+simplestlab-lb:
   image:
     repository: docker.io/nginx
     pullPolicy: IfNotPresent
     tag: "alpine"
+  service:
+    port: 8080
+  ##################################
+  # Second Test Update -- Uncomment whti section
+  nginxConfig: |
+    user  nginx;
+    worker_processes  auto;
+    error_log  /tmp/nginx/error.log warn;
+    pid        /tmp/nginx/nginx.pid;
 
-    ###################################
-    ## Second Test Update -- Uncomment whti section
-    # nginxConfig: |
-    #     user  nginx;
-    #     worker_processes  auto;
+    events { 
+      worker_connections  1024; 
+    }
 
-    #     error_log  /tmp/nginx/error.log warn;
-    #     pid        /tmp/nginx/nginx.pid;
+    http { 
+      server {
+        listen 8080;
+        location /healthz { 
+          add_header Content-Type text/plain;
+          return 200 'OK';
+        } 
+        location / {
+          proxy_pass http://simplestlab-simplestlab-app:3000;
+        }   
+      }
+    }
 
-    #     events { 
-    #       worker_connections  1024; 
-    #     }
-
-    #     http { 
-    #       server {
-    #         listen 8080; # specify a port higher than 1024 if running as non-root user 
-    #         location /healthz { 
-    #             add_header Content-Type text/plain;
-    #             return 200 'OK';
-    #         } 
-    #         location / {
-    #           proxy_pass http://simplestlab-simplestlab-app:3000;
-    #         }   
-    #       }
-    #     }
-    ####################################
-
-    
+  ###################################
