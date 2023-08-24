@@ -193,9 +193,11 @@ Successfully installed
 
 + Linux:
 
-If you are using Linux, you can use your package manager to install Git. 
-
-XXX
+If you are using Linux, you can use the kubectl binary directly. 
+```
+Chapter13$ curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" -o $HOME/bin/kubectl
+Chapter13$ chmod 755 $HOME/bin/kubectl
+```
 
 
 + Windows:
@@ -208,16 +210,16 @@ Chapter13$ Invoke-WebRequest -URI https://dl.k8s.io/release/v1.28.0/bin/windows/
 
 + Linux:
 
-If you are using Linux, you can use your package manager to install Git. 
-
-XXX
-
+If you are using Linux, you can use the helm binary directly. Download your desired version from Download your desired version, unpackage it and move the helm binary to your $HOME/bin directory.
 
 + Windows:
 ```
 Chapter13$ Invoke-WebRequest -URI https://get.helm.sh/helm-v3.12.2-windows-amd64.zip -OutFile $env:TEMP\helm.zip -UseBasicParsing
 
 Chapter13$ Expand-Archive $env:TEMP\helm.zip -DestinationPath $env:TEMP\helm_install
+
+Chapter13$ mv $env:TEMP\helm_install\windows-amd64\helm.exe $HOME\bin\helm.exe
+
 
 Chapter13$  helm version
 version.BuildInfo{Version:"v3.10.2", GitCommit:"50f003e5ee8704ec937a756c646870227d7c8b58", GitTreeState:"clean", GoVersion:"go1.18.8"}
@@ -231,16 +233,22 @@ version.BuildInfo{Version:"v3.10.2", GitCommit:"50f003e5ee8704ec937a756c64687022
 If you are using Linux, you can use your package manager to install Git. 
 - Linux
 ```
-curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-rm argocd-linux-amd64
+Chapter13$ curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+Chapter13$ sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+Chapter13$ rm argocd-linux-amd64
 ```
-
-
 
 + Windows:
 ```
-XXXX
+$version = (Invoke-RestMethod https://api.github.com/repos/argoproj/argo-cd/releases/latest).tag_name
+```
+Replace $version in the command below with the version of Argo CD you would like to download:
+```
+$url = "https://github.com/argoproj/argo-cd/releases/download/" + $version + "/argocd-windows-amd64.exe"
+$output = "argocd.exe"
+Invoke-WebRequest -Uri $url -OutFile $HOME/bin/$output
+
+
 ```
 
 
@@ -293,15 +301,15 @@ namespace/simplestlab created
 Because you have cloned the Labs from Packt GitHub repositoy, your application directories already include a .git folder. Copy the content of SimplestLab folder to a new worspace location on the Chapter13 folder.
 - Linux:
 ```
-cp -R SimplestLab SimplestLab_Working
+Chapter13$ cp -R SimplestLab Simplestlab_WORKSPACE
 ```
 
 - Windows:
 ```
-Copy-Item SimplestLab -Recurse  -Destination SimplestLab_Working
+Copy-Item SimplestLab -Recurse  -Destination Simplestlab_WORKSPACE
 ```
 
->NOTE: Remove all the hiden .git folders in SimplestLab_Working folder and subfolders if any everytime you start with the lab.
+>NOTE: Remove all the hiden .git folders in Simplestlab_WORKSPACE folder and subfolders if any everytime you start with the lab.
 
 
 How we will use these folder:
@@ -312,6 +320,8 @@ How we will use these folder:
 
 - During the labs we will just modify the values file included inside ___Values___ folder. This way, we can manage the ___SimplestLab___ deployment parameters.
 
+
+>IMPORTANT NOTE: For now on we will use Simplestlab_WORKSPACE instead of the original Simplestlab folder, although you may read Simplestlab. You have copied the complete content without the .git files to be able to use all the GitLab respositories for managing all code changes. You can use Git commands to initialize the git local repository.
 
 ## GitLab Installation
 
@@ -456,7 +466,7 @@ We have prepared for you a script that generates a valid values YAML file for th
 
 >IMPORTANT NOTE: In ArgoCD we will include the GitLab CA. You can use the create_values.sh script or change the ___GITLABCA___ with your value, obtained using __kubectl get secret -n gitlab gitlab-wildcard-tls-ca -o jsonpath='{.data.cfssl_ca}'__ (you can use the procedure shown for obtaining the GitLab root password).
 >```
->kubectl get secret -n gitlab gitlab-wildcard-tls-ca -o jsonpath='{.data.cfssl_ca}' |base64 -d
+>Chapter13$  kubectl get secret -n gitlab gitlab-wildcard-tls-ca -o jsonpath='{.data.cfssl_ca}' |base64 -d
 >-----BEGIN CERTIFICATE-----
 >MIIFTDCCAzSgAwIBAgIUWyQorye5QhY+xkqAv34NlfAOeJIwDQYJKoZIhvcNAQEN
 >BQAwPjEPMA0GA1UEChMGZ2l0bGFiMQ8wDQYDVQQLEwZnaXRsYWIxGjAYBgNVBAMT
@@ -520,7 +530,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 We quiclky take a look at the Ingress generated:
 ```
-kubectl get ingress -n argocd
+Chapter13$ kubectl get ingress -n argocd
 NAME            CLASS   HOSTS                          ADDRESS          PORTS   AGE
 argocd-server   nginx   argocd.172.31.255.254.nip.io   172.31.255.254   80      99s
 
@@ -562,7 +572,6 @@ QDKoHBovDxdO0rt1
 And now we can access the ArgoCD URL in https://argocd.172.31.255.254.nip.io/ using __admin__ user and its associated password.
 
 ![ch13-2](./readme_images/ch13-2.png)
-admin/K78771IQwmJqq9Gv
 
 
 ## Upload Code to GitLab
