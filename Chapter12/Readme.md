@@ -6,7 +6,7 @@ The following labs will provide examples to put into practice concepts and proce
 
 >__IMPORTANT NOTE: Please stop Docker Desktop before creating your Minikube environemnt. Both can run at the same time but they will consume lot of hardware resources and you should choose the right Kubernetes context for your environment.__ 
 
-Ensure you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter11 directory. 
+Ensure you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter12 directory. 
 
 You can use one of the following Kubernetes Desktop environments:
 - Docker Desktop (NetworkPolicy resources are not available at the time of writting this book in this platform)
