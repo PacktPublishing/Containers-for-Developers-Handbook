@@ -270,6 +270,9 @@ Chapter13$ minikube start --driver=docker --memory=8gb --cpus=4 --addons=ingress
    Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
 
 ```
+
+![ch13-1](./readme_images/ch13-1.png)
+
 We can easily verify our environment:
 ```
 Chapter13$ kubectl get nodes
@@ -427,7 +430,7 @@ gitlab-webservice-default   nginx   gitlab.172.31.255.254.nip.io     172.31.255.
 
 We can now access GitLab using our browser and openning https://gitlab.172.31.255.254.nip.io using __root__ user and its associated password.
 
-IMAGE
+![ch13-2](./readme_images/ch13-2.png)
 
 
 ## Include GitLab registry CA inside Minikube
@@ -558,7 +561,7 @@ QDKoHBovDxdO0rt1
 ```
 And now we can access the ArgoCD URL in https://argocd.172.31.255.254.nip.io/ using __admin__ user and its associated password.
 
-Figure33 - ArgoCD Login
+![ch13-2](./readme_images/ch13-2.png)
 admin/K78771IQwmJqq9Gv
 
 
@@ -578,51 +581,56 @@ password: c0der000
 email: coder@labs.local
 ```
 
-Fig3
+![ch13-4](./readme_images/ch13-4.png)
 
 2 - We now change the __coder__ user password as we are not using real emails.
     We used c0der000 (8 characters minimum an cant' be usual words)
 
->NOTE: The first time you login into GitLab with ___coder___ user you will be asked to change your password, but you can reuse the old one added as ___root___ user.
-
-Fig4
-
-We now create __SimplestLab__ group in GitLab. Code, Values, Images and HelmCharts subgroups will be included later. This will help us managea full project:
-
-1 - Create ___SimplestLab___ group as __Public__ (this will make things simple).
-
-Fig5
-
-2 - We will now add the ___coder___ user as owner of the ___SimplestLab___ group. We use _Invite members_ button. Anyway, this can be executed with the __coder__ uer because it has permissions for creating groups and subgroups.
-
-Fig6
+![ch13-5](./readme_images/ch13-5.png)
 
 3 - Now we sign out from ___root___ user and login into GitLab with ___coder___ user. 
 
-Fig7
+>NOTE: The first time you login into GitLab with ___coder___ user you will be asked to change your password, but you can reuse the old one added as ___root___ user.
 
 
-3 - With coder user we will create ___Code___, ___HelmCharts___, ___Values___ and ___Images___ subgroups inside the ___SimplestLab___ group. We have simplified the full process for a quick demo environment and used only one project for the code, we will just include the ___App___ component of the application. All other images will be used already built (Postgres Database and Nginx Loadbalancer). 
+4 - We now create __SimplestLab__ group in GitLab. Code, Values, Images and HelmCharts subgroups will be included later. This will help us managea full project:
 
-Fig8
+5 - Create ___SimplestLab___ group as __Public__ (this will make things simple).
+
+![ch13-6](./readme_images/ch13-6.png)
+
+
+6 - Disable Auto DevOps in this group
+
+![ch13-7](./readme_images/ch13-7.png)
+
+
+7 - We will create ___Code___, ___HelmCharts___, ___Values___ and ___Images___ subgroups inside the ___SimplestLab___ group. We have simplified the full process for a quick demo environment and used only one project for the code, we will just include the ___App___ component of the application. All other images will be used already built (Postgres Database and Nginx Loadbalancer). 
+This subgroup will be Private.
+
+![ch13-8](./readme_images/ch13-8.png)
 
 
 We create ___Images___ project as __Public__ to simplify the demo environment avoiding the need of using registry authentication to pull images from Kubernetes.
+This subgroup will be Public.
 
-Fig9 
+![ch13-9](./readme_images/ch13-9.png) 
 
 We create ___HelmCharts___ project as __Public__ too to simplify the demo environment avoiding the need of using registry authentication to pull charts from ArgoCD.
 
-Fig10
+![ch13-10](./readme_images/ch13-10.png) 
 
 Final distribution is show in the following screenshot.
 
-Fig11
+![ch13-11](./readme_images/ch13-11.png) 
+
+- Code and Values - __Private__
+- HelmCarts and Images - __Public__ (just to make things easier during the demo, we will not need to authenticate for pulling container images or Helm Chart packages).
 
 
 4 - Now we create the ___simplestapp___ project inside the ___Code___ subgroup and push our code.
 
-Fig12
+![ch13-12](./readme_images/ch13-12.png) 
 
 
 We are now ready to upload our code.
@@ -717,10 +725,10 @@ branch 'main' set up to track 'origin/main'.
 
 And now we can verify our code in GitLab GUI directly:
 
-Fig13 - Code is pushed to ___simplestapp___ project.
+![ch13-13](./readme_images/ch13-13.png) 
 
 
-We can test the full process changing something (create a README.md file for example) and then pulling our code.
+We can test the full process changing something (create a README.md file for example using the GUI) and then pulling our code.
 ```
 Chapter13$ git pull
 remote: Enumerating objects: 4, done.
@@ -814,7 +822,7 @@ build-release:
      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
      --destination "${RELEASE_IMAGE}"
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
 
 ```
 
@@ -823,13 +831,13 @@ This file includes the following sections:
 
 - ___.common-build___ and ___.release-build___ - Declare some variables and scripts that will be included in real stages.
 
-- validate-dockerfile - Using a __Hadolint__ docker image we will validate our Dockerfile.
+- ___validate-dockerfile___ - Using a __Hadolint__ docker image we will validate our Dockerfile.
 
-- trivy-scan - We will use a __Trivy__ docker image to scan our code files for misconfigurations, secrets and vulnerable binaries.
+- ___trivy-scan___ - We will use a __Trivy__ docker image to scan our code files for misconfigurations, secrets and vulnerable binaries.
 
-- build - This stage will create __development__ images inside the code/Simplestapp repository. 
+- ___build___ - This stage will create __development__ images inside the code/Simplestapp repository. 
 
-- build-release - This stage will only build __release__ images, inside the Images/Simplestapp repositoy
+- ___build-release___ - This stage will only build __release__ images, inside the Images/Simplestapp repositoy
 
 >IMPORTANT NOTE:
 >
@@ -841,11 +849,11 @@ This file includes the following sections:
 >    kubectl get secret -n gitlab -o yaml gitlab-wildcard-tls-chain -o jsonpath='{.data.gitlab\.172\.31\.255\.254\.nip\.io\.crt}'
 >    ```
 >
->They should be created at group level, in the SimplestLab main group (Settings>CI/CD>Variables). This will ensure they are used in all the contained projects. DO NOT MARK THE __'Protected'__ checkbox as we will not use any of these variables on protected repositories.
+>They should be created at group level, in the SimplestLab main group (Settings>CI/CD>Variables). This will ensure they are used in all the contained projects. Do not mark the __'Protected'__ checkbox as we will not use any of these variables on protected repositories. Just check ___Masked___ on the user password variable and leave others emtpy for all the variables.
 >
 >Following screenshot shows the final situation, when all are created:
 >
-> FIGURE gitlab_global_variables.png
+> ![ch13-14](./readme_images/ch13-14.png)
 >
 >
 >Defined variables will be used to authenticate using the coder user and push release images in the SimplestLab/Images/Simplestapp repository, under __Deploy>Container Registry__ section.
@@ -883,71 +891,19 @@ To https://gitlab.172.31.255.254.nip.io/simplestlab/code/simplestapp.git
 branch 'dev' set up to track 'origin/dev'.
 ```
 
-Figure15
+We can verify the Pipeline section:
 
-```
-Chapter13$ git switch -c prod
-Switched to a new branch 'prod'
-Chapter13$ git push --set-upstream origin prod
-Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
-remote:
-remote: To create a merge request for prod, visit:
-remote:   https://gitlab.172.31.255.254.nip.io/simplestlab/code/simplestapp/-/merge_requests/new?merge_request%5Bsource_branch%5D=prod
-remote:
-To https://gitlab.172.31.255.254.nip.io/simplestlab/code/simplestapp.git
- * [new branch]      prod -> prod
-branch 'prod' set up to track 'origin/prod'.
-```
+![ch13-15](./readme_images/ch13-15.png)
 
-Figure16
+And the Jobs:
 
+![ch13-16](./readme_images/ch13-16.png)
 
-
-```
-Chapter13$ git add .gitlab-ci.yml
-
-Chapter13> git commit -m "Added gitlab-ci"
-[main 2cb374b] Added gitlab-ci
- 1 file changed, 23 insertions(+)
- create mode 100644 .gitlab-ci.yml
-
-Chapter13$ git push --set-upstream origin main
-Enumerating objects: 4, done.
-Counting objects: 100% (4/4), done.
-Delta compression using up to 24 threads
-Compressing objects: 100% (3/3), done.
-Writing objects: 100% (3/3), 760 bytes | 760.00 KiB/s, done.
-Total 3 (delta 1), reused 0 (delta 0), pack-reused 0
-To https://gitlab.172.31.255.254.nip.io/simplestlab/code/simplestapp.git
-   4430abc..2cb374b  main -> main
-branch 'main' set up to track 'origin/main'.
-```
 
 Dev container images will be created in the __Deploy>Container Registry__ in the same code repository. And release images will go to SimplestLab/Images/Simplestapp repository.
 
 
-
-```
-Chapter13$ git switch -c dev
-Switched to a new branch 'dev'
-Chapter13$ git merge main
-Already up to date.
-Chapter13$ git push --set-upstream origin dev
-Total 0 (delta 0), reused 0 (delta 0), pack-reused 0
-remote:
-remote: To create a merge request for dev, visit:
-remote:   https://gitlab.172.31.255.254.nip.io/simplestlab/code/simplestapp/-/merge_requests/new?merge_request%5Bsource_branch%5D=dev
-remote:
-To https://gitlab.172.31.255.254.nip.io/simplestlab/code/simplestapp.git
- * [new branch]      dev -> dev
-branch 'dev' set up to track 'origin/dev'.
-```
-
-Figure15
-
-
-Before pushing a production release, ensure you already have configured required variables at group level:
-Figure27
+>NOTE: Before pushing a production release, ensure you already have configured required variables at group level.
 
 Now we can push a production ready code: 
 ```
@@ -972,10 +928,15 @@ To https://gitlab.172.31.255.254.nip.io/simplestlab/code/simplestapp.git
 
 ```
 
-Figure16
+![ch13-17](./readme_images/ch13-17.png)
+
+And the release images will be created inside the Images subgroup, in ___Images/SimplestApp___:
+
+![ch13-18](./readme_images/ch13-18.png)
 
 
-## Mnaging Helm Chart repositories
+
+## Managing Helm Chart repositories
 
 
 We can now continue pushing the Helm Charts code. But first, we must create the different Helm Charts repositories under HelmCharts subgroup.
@@ -1048,9 +1009,10 @@ This projects should be Public in this demo because we will not declare any cred
 >__IMPORTANT NOTE: SimplestLab umbrella Chart depends on SimplestLab-app, SimplestLab-db and SimplestLab-lb Charts. Whatever change you made into any of these projects requires a Helm Chart dependencies update on the SimplestLab umbrella Chart.__ While you use the prepared CI/CD environment, you will need to run the SimplestLab umbrella Chart project pipeline again to rebuild these dependecies. If you want do manually update them, you will use helm dependencies update in the HelmCharts/SimplestLab directory. We prepared various scenarios in the Chart.yaml file in case you want to test it locally (LOCAL comments).
 
 
-We will now push the Helm Charts code into their Gitlab associated repositories. Following code snippet shows an example for simplestlab umbrella:
+![ch13-19](./readme_images/ch13-19.png)
 
-Figure26 - Create HelmChars/Simplestlab - umbrella chart
+
+We will now push the Helm Charts code into their Gitlab associated repositories. Following code snippet shows an example for simplestlab umbrella:
 
 ```
 Chapter13$ pwd
@@ -1127,7 +1089,7 @@ check-dependencies:
     - echo "Updating dependencies for validation."
     - helm dependencies update
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || '$CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
 
 
 package-dev:
@@ -1156,7 +1118,7 @@ package-release:
     - helm push package/* oci://docker.io/${DOCKERHUB_USERNAME}
 
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
 
 ```
 We defined 3 stages:
@@ -1175,7 +1137,7 @@ In this pipeline, we will create ___-dev___ packages and ___X.Y.X___ release pac
 >
 >These variables are defined in the HelmChart/SimplestLab umbrella chart only. This repository is Public and anyone will read your password, but you are using your own demo environment. You can secure this password making it Private, but you will need to prepare some username authentication (new user or even coder user here) and include it in __ArgoCD OCI repository__.
 >
->FIgUre - gitlab_helmcharts-simplestlab_variables.png
+>![ch13-20](./readme_images/ch13-20.png)
 >
 >These credentials will be used to push release Chart packages to DockerHub (docker.io). This is used as workaround to the issue you will find trying to download OCI packages from a self-signed TLS protected repository in ArgoCD (https://github.com/argoproj/argo-cd/issues/12371 issue is still open). We will push release images to docker.io and then we will configure this repository in ArgoCD. We are considering here all our OCI packages as public, hence anyone can pulled for demo purposes.
 
@@ -1289,8 +1251,15 @@ To https://gitlab.172.18.158.255.nip.io/simplestlab/helmcharts/simplestlab.git
  * [new tag]         1.0.0 -> 1.0.0
 ```
 
-Figure32 - Package 1.0.0 was created.
+The package build will be triggered:
 
+![ch13-21](./readme_images/ch13-21.png)
+
+And the final package will pushed to DockerHub, as defined in our __.gitlab-ci.yml__ file for the ___HelmCharts/SimplestLab___ repository only:
+
+![ch13-22](./readme_images/ch13-22.png)
+
+We will now prepare the values file that will manage the complete ___SimplestLab___ application.
 
 ## Adding the Values repository
 
@@ -1489,7 +1458,7 @@ As you may have noticed, "argocd-manager" ServiceAccount is created with all its
 
 We can now login as admin user into ArgoCD and create the SimplestLab Project.
 
-![ArgoCD_Create_Project](./readme_images/argocd_create_project.png)
+![ch13-23](./readme_images/ch13-23.png)
 
 
 And now we can create the different repositories used for our project:
@@ -1512,7 +1481,7 @@ Now, we go back to the project settings and verify the right code and artifacts 
 
 Following screenshot shows the final configuration:
 
-![ArgoCD_Project_Settings](./readme_images/argocd_project_settings.png)
+![ch13-24](./readme_images/ch13-24.png)
 
 
 In such situation, we are able to use any repository and kubernetes.default.svc cluster.
@@ -1572,15 +1541,15 @@ application.argoproj.io/minikube-simplestlab created
 As soon it is created, we will see the application in the ArgoCD GUI:
 
 
-![ArgoCD_SimplestLab_Application](./readme_images/argocd_simplestlab_application.png)
+![ch13-25](./readme_images/ch13-25.png)
 
 At this point, the application doesn't work:
 
-![ArgoCD_SimplestLab_Application_Error](./readme_images/argocd_simplestlab_application_error1.png)
+![ch13-26](./readme_images/ch13-26.png)
 
 Two components are in error state. We can easily locate them by using the filters available on the left panel:
 
-![ArgoCD_SimplestLab_Application_Error](./readme_images/argocd_simplestlab_application_error1a.png)
+![ch13-27](./readme_images/ch13-27.png)
 
 The __App__ component does not work because it can't connect to ___db___ database service. This makes also fail the ___Lb___ component, because it connects and serves the ___App___ component.
 
@@ -1647,20 +1616,20 @@ To https://gitlab.172.31.255.254.nip.io/simplestlab/values/simplestlab.git
 
 And now the changes are shown in our ArgoCD GUI. We haven't configured auto-sync, hence we will see a misconfiguration of the values (out-of-sync). Current values in the cluster are different from those expected by the configuration:
 
-![ArgoCD_SimplestLab_Application_OutOfSync](./readme_images/argocd_simplestlab_application_outofsync1.png)
+![ch13-28](./readme_images/ch13-28.png)
 
 
 4 - We can now proceed to sync the creation of the secret with the right values. We gill push sync in the Secret resource.
 
-![ArgoCD_SimplestLab_Application_OutOfSync](./readme_images/argocd_simplestlab_application_outofsync2.png)
+![ch13-29](./readme_images/ch13-29.png)
 
 5 - Once the Secret reource is replaced, we need to delete the old Pod, which uses the old Secret resource. Kubernetes ReplicaSet Controller will create anew Pod for us.
 
-![ArgoCD_SimplestLab_Application_OutOfSync](./readme_images/argocd_simplestlab_application_outofsync3.png)
+![ch13-30](./readme_images/ch13-30.png)
 
 6 - ___App___ component works, but we need to fix the ___Lb___ component. We can review the new Pod's log and see it is working now:
 
-![ArgoCD_SimplestLab_Application_OutOfSync](./readme_images/argocd_simplestlab_application_outofsync4.png)
+![ch13-31](./readme_images/ch13-31.png)
 
 But ___Lb___ component doesn't work.
 
@@ -1753,13 +1722,13 @@ To https://gitlab.172.31.255.254.nip.io/simplestlab/values/simplestlab.git
 
 4 - New changes are not synced in ArgoCD:
 
-![ArgoCD_SimplestLab_Application_OutOfSync](./readme_images/argocd_simplestlab_application_outofsync5.png)
+![ch13-32](./readme_images/ch13-32.png)
 
 
 5 - We sync the change and delete the ___Lb___ Pod, associated with the DaemonSet to fix the Nginx configuration issue. After the syncronization and the removal of the Pod, the new Pod works fine.
 The ArgoCD shows the application __Healthy__ and __Synced__.
 
-![ArgoCD_SimplestLab_Application_OutOfSync](./readme_images/argocd_simplestlab_application_outofsync6.png)
+![ch13-33](./readme_images/ch13-33.png)
 
 
 
@@ -1767,7 +1736,7 @@ This ws the last step on this long lab. You can make changes to either your conf
 
 We can't explain you in a lab all the configurations we have done to make all the workflow work, we gave you the tips and you can deep dive by your self exploring the already prepared configuration and script steps done.
 
-It would be nice to follow the lab by including now the NetworkPolicy resources created in Chapter 11 and the Nginx and Postgres exporters prepared in Chapter 12.
+It would be nice to follow the lab by including now the NetworkPolicy resources created in Chapter 11 and the Nginx and Postgres Prometheus exporters prepared in Chapter 12.
 
 
 

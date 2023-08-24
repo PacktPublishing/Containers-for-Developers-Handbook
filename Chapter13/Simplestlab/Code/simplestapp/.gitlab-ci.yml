@@ -67,4 +67,4 @@ build-release:
      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
      --destination "${RELEASE_IMAGE}"
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/

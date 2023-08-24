@@ -11,6 +11,7 @@ stages:
     - helm registry login -u $PROJECTGROUP_USER -p $PROJECTGROUP_PASSWORD $CI_REGISTRY --insecure
     - printf '%s\n' "${LABS_LOCAL_GITLAB_CERTIFICATE}" |sed 's/- /-\n/g; s/ -/\n-/g' | sed '/CERTIFICATE/! s/ /\n/g' >> /apps/ca-certificates.crt
     - export SSL_CERT_FILE=/apps/ca-certificates.crt
+    # If you prefer not to load the cetificate
     #- export HELM_PUSH="helm push --insecure-skip-tls-verify"
     - export HELM_PUSH="helm push"
 
@@ -32,7 +33,7 @@ check-dependencies:
     - echo "Updating dependencies for validation."
     - helm dependencies update
   rules:
-    - if: $CI_COMMIT_BRANCH == "dev" || '$CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+    - if: $CI_COMMIT_BRANCH == "dev" || $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
 
 
 package-dev:
@@ -61,4 +62,4 @@ package-release:
     #- helm push package/* oci://docker.io/${DOCKERHUB_USERNAME}
 
   rules:
-    - if: '$CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/'
+    - if: $CI_COMMIT_TAG =~ /^\d+\.\d+\.\d+$/
