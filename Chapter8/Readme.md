@@ -1,18 +1,18 @@
 # Chapter 8 Labs 
 
-In this chapter we are going to have a short lab section that we help us to learn and understand the basics of deploying a local Kubernetes environment with Minikube and test some of its resource types to validate the cluster. 
+In this chapter we are going to have a short lab section that will help us to learn and understand the basics of deploying a local Kubernetes environment with Minikube and test some of its resource types to validate the cluster. 
 
-The code for the labs is available in this book’s GitHub repository in https://github.com/ PacktPublishing /Docker-for-Developers-Handbook.git. Ensure you have the latest revision available by simply executing git clone https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git to download all its content or git pull if you already downloaded the repository before. All commands and content used in these labs will be located inside Docker-for-Developers-Handbook/Chapter8 directory. 
+The code for the labs is available in this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. Ensure you have the latest revision available by simply executing git clone https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git to download all its content or git pull if you already downloaded the repository before. All commands and content used in these labs will be located inside Docker-for-Developers-Handbook/Chapter8 directory. 
 
 We will start by deploying a Minikube cluster with 2 nodes ( 1 master + 1 worker). We will deploy them with 3GB of RAM each, which will be more than enough for testing applications behavior when some of the cluster node dies, but you will probably don’t need 2 nodes for your daily usage. 
 
 ## Deploying a Minikube cluster with 2 nodes 
 
-In this lab we will deploy a fully functional Kubernetes cluster, for testing purposes, locally. We continue working on a Windows 10 laptop with 16GB of RAM, which is enough for the labs in this book. 
+In this lab we will deploy a fully functional Kubernetes cluster, for testing purposes, locally. We will continue working on a Windows 10 laptop with 16GB of RAM, which is enough for the labs in this book. 
 
-1. Install Minikube, downloading first from https://minikube.sigs.k8s.io/docs/start/, choose the appropriate installation method and follow the simple steps for your operating system. We will use Hyper-V, hence it must be enabled and running on your desktop computer or laptop. 
+1. Install Minikube; Firstly, download from https://minikube.sigs.k8s.io/docs/start/, choose the appropriate installation method and follow the simple steps for your operating system. We will use Hyper-V, hence it must be enabled and running on your desktop computer or laptop. 
 
-2. Once Minikube is installed, we will open an administrator Powershell. Minikube deployments using Hyper-V require the execution with administrator privileges. This is due to the Hyper-V layer, hence admin provileges won’t be required if you VirtualBox as hypervisor or Linux as base operating system (other hypervisors may be used, such as KVM, which works very nice with Minikube). Admin rights will also be required to remove the minikube cluster. Once the Powershell terminal is ready, we execute minikube start --nodes 2 --memory 3G --cpus 2 --kubernetes-version=stable --driver=hyperv --cni=calico --addons=ingress,metrics-server,csi-hostpath-driver. This will create a cluster with 2 nodes (3GB of memory each) with current stable Kubernetes release (1.26.3 at the time of writting this book), using Calico as CNI, and the hosts’ storage for volumes. It also delivers automatically an Ingress Controller for us.  
+2. Once Minikube is installed, we will open an administrator Powershell. Minikube deployments using Hyper-V require the execution with administrator privileges. This is due to the Hyper-V layer, hence admin provileges won’t be required if you VirtualBox as hypervisor or Linux as base operating system (other hypervisors may be used, such as KVM, which works very nice with Minikube). Admin rights will also be required to remove the minikube cluster. Once the Powershell terminal is ready, we execute minikube start --nodes 2 --memory 3G --cpus 2 --kubernetes-version=stable --driver=hyperv --cni=calico --addons=ingress,metrics-server,csi-hostpath-driver. This will create a cluster with 2 nodes (3GB of memory each) with current stable Kubernetes release (1.26.3 at the time of writting this book), using Calico as CNI, and the host's storage for volumes. It also delivers automatically an Ingress Controller for us.  
 ``` 
 PS C:\Windows\system32> cd c:\
 
@@ -63,7 +63,7 @@ minikube       Ready    control-plane   23m   v1.26.3
 minikube-m02   Ready    <none>          18m   v1.26.3 
 ```
 
-As you may noticed, minikube-m02 node does not show any role. This is due to the fact that everything in Kubernetes is manage by labels. Remember that we have seen how selectors are used to identify which pods belong to an specific replicaSet.  We can review the node labels and create a new one for the worker node. This will show us how we can modify the resources behavior by using labels. 
+As you may noticed, minikube-m02 node does not show any role. This is due to the fact that everything in Kubernetes is managed by labels. Remember that we have seen how selectors are used to identify which pods belong to an specific replicaSet.  We can review the node labels and create a new one for the worker node. This will show us how we can modify the resources behavior by using labels. 
 ```
 PS C:\> kubectl get nodes --show-labels 
 
@@ -77,7 +77,7 @@ minikube-m02   Ready    <none>          22m   v1.26.3   beta.kubernetes.io/arch=
 Lots of labels are assigned to both nodes but we miss node-role.kubernetes.io/worker on the worker node. 
 
 
-4. We now add a new label to the worker node by using kubectl label <RESOURCE> <LABEL_TO_ADD>: 
+4. We can now add a new label to the worker node by using kubectl label <RESOURCE> <LABEL_TO_ADD>: 
 ```
 PS C:\> kubectl label node minikube-m02  node-role.kubernetes.io/worker= 
 
@@ -118,7 +118,7 @@ PS C:\> kubectl get pods -n chapter8
 No resources found in chapter8 namespace. 
 ```
 
-We can try now on ingress-nginx namespace. We are going to list all the resources deployed in this namespace using kubectl get all, as we see on following screeshot: 
+We can try now on ingress-nginx namespace. We are going to list all the resources deployed in this namespace using kubectl get all, as we see on the following screenshot: 
 
  
 
@@ -141,7 +141,7 @@ NAME        READY   STATUS    RESTARTS   AGE
 webserver   1/1     Running   0          11s 
 ```
 
-Notice that we used an external registry for storing the images. Kubernetes does not use local stores for pulling images. As we expect to have on any other container orchestrator environment, a registry is needed and hosts’ kubelet component will pull images from this. You will never synchronize images manually between nodes in a cluster.  
+Notice that we used an external registry for storing the images. Kubernetes does not use local stores for pulling images. As we expect to have on any other container orchestrator environment, a registry is needed and host’s kubelet component will pull images from this. You will never synchronize images manually between nodes in a cluster.  
 
 4. Let’s review the resource manifest now. It is important to understand that kubectl command talks with the Kubernetes API using the credentials from our local kubeconfig (this file is located in your home under .kube directory, you can use $env:USERPROFILE\.kube in Microsoft Windows) and the Kube-APIserver gets this information from the Etcd before it is presentedin our terminal. Following screenshot shows part of the output we get using kubectl get pod <PODNAME> -o yaml. The –o yaml modifier shows the output from a current resource in yaml format. This will really help us understand how objects are created and manage by Kubernetes. 
 
