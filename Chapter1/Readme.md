@@ -2,7 +2,7 @@
 # __Chapter 1 Labs__
 
 ## __Technical requirements__
-This book will teach you how to use software containers for improving your applications development. We will use opensource tools for building, sharing and running containers as well as few commercial ones that can run without licensing for non-professional use. We included in this book some labs for helping understand the content presented. These labs are published in following URL https://github.com/PacktPublishing/Docker-For-Developers-Handbook, where you will find some extended explanations, omitted in the book’s content to make chapters easier to follow.
+This book will teach you how to use software containers for improving your applications development. We will use open source tools for building, sharing and running containers as well as few commercial ones that can run without licensing for non-professional use. We included in this book some labs for helping understand the content presented. These labs are published in following URL https://github.com/PacktPublishing/Docker-For-Developers-Handbook, where you will find some extended explanations, omitted in the book’s content to make chapters easier to follow.
 A common laptop or desktop computer with modern CPU (Intel Core i7, i5 or equivalent AMD CPU) with 16 GB of RAM is recommended, although you would probably be able to run labs with less resources but experience may be impacted. You could use either Microsoft Windows operating system or Linux, although Linux will be used as reference. It is expected to have some Linux/Windows operating systems knowledge at user-level and coding experience in common programming languages, although examples are not complicated and will be easy to follow.
 
 In this lab we will install a fully functional development environment for container-based applications. We will use Docker Desktop because it includes a container runtime, its client and a minimal but fully functional Kubernetes orchestration solution.
@@ -34,7 +34,7 @@ Let’s continue with Docker Desktop installation. Download the installer from t
 Once downloaded, execute the “Docker Desktop Installer.exe” binary. You will be asked to choose between Hyper-V or WSL2 backend virtualization and we will choose WSL2.
 ![Docker Desktop WSL2](./images/ch1_lab5.png)
 
-After clicking “OK” button, installation process will begging uncompressing required files (libraries, binaries, default configurations, ...etc). This could take some time (1-3 minutes) depending on your host’s disk speed and compute resources.
+After clicking “OK” button, installation process will begin uncompressing required files (libraries, binaries, default configurations, ...etc). This could take some time (1-3 minutes) depending on your host’s disk speed and compute resources.
 ![Docker Desktop Installation](./images/ch1_lab5.png)
 
 As final step, we will be asked to logout and login again because our user was added to new system groups (docker) to enable access to remote docker daemon via operating system pipes (similar to Unix sockets).
@@ -44,7 +44,7 @@ Once we login, we can execute Docker Desktop using the newly added application i
 We accept redacted Docker Subscription license terms and Docker Desktop will start. This may take a minute.
 ![Docker Desktop Starting](./images/ch1_lab7.png)
 
-You can skip the quick guide that will appear when Docker Desktop is running, because we will learn more in next chapters, deep diving in container images building and containers execution. 
+You can skip the quick guide that will appear when Docker Desktop is running, because we will learn more in next chapters, deep-diving in container images building and containers execution. 
 We will get following screen, showing us that Docker Desktop is ready.
 ![Docker Desktop Started](./images/ch1_lab8.png)
 
