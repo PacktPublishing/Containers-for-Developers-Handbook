@@ -6,7 +6,7 @@ The following labs will provide examples to put into practice concepts and proce
 
 >__IMPORTANT NOTE: Please stop Docker Desktop before creating your Minikube environemnt. Both can run at the same time but they will consume lot of hardware resources and you should choose the right Kubernetes context for your environment.__ 
 
-Ensure you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter11 directory. 
+Ensure that you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter11 directory. 
 
 You can use one of the following Kubernetes Desktop environments:
 - Docker Desktop (NetworkPolicy resources are not available at the time of writting this book in this platform)
@@ -31,15 +31,15 @@ These labs will definitely help you understand how to improve the security of an
 >- Rancher Desktop 
 >![AppGui](images/reset-rancher.PNG)
 >
->The Reset Kubernetes button, completely removes all the workloads and resources created, which is great to start things over. I really recommend reseting your cluster before starting this Labs section.
+>The Reset Kubernetes button, completely removes all the workloads and resources created, which is great to start things over. I highly recommend reseting your cluster before starting this Labs section.
 
 
 # Improving applications access with an Ingress Controller
 
 ## Deploying your own Ingress Controller
-In this first task, we will deploy our own Ingress Controller. We are using Docker Desktop, which provides a good LoadBalancer service implementation. These Service resources will attach the localhost IP address, which will makeit easy to connect to the published services.
+In this first task, we will deploy our own Ingress Controller. We are using Docker Desktop, which will provide a good LoadBalancer service implementation. These Service resources will attach the localhost IP address, which will make it easy to connect to the published services.
 
-We will use Kubernetes Nginx Ingress Controller (https://kubernetes.github.io). We will use the cloud deployment (https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/cloud/deploy.yaml) because Docker Desktop provides LoadBalancer services. If you are using a complete baremetal infrastructure, please use the baremetal YAML (https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/baremetal/deploy.yaml) and follow the additional instructions here https://kubernetes.github.io/ingress-nginx/deploy/baremetal/ for NodePort routing.
+We will use Kubernetes Nginx Ingress Controller (https://kubernetes.github.io). We will use the cloud deployment (https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/cloud/deploy.yaml) because Docker Desktop provides LoadBalancer services. If you are using a complete bare-metal infrastructure, please use the baremetal YAML (https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.1/deploy/static/provider/baremetal/deploy.yaml) and follow the additional instructions here https://kubernetes.github.io/ingress-nginx/deploy/baremetal/ for NodePort routing.
 
 >NOTE: Local copies are provided in the repository as [kubernetes-nginx-ingress-controller-full-install-cloud.yaml](kubernetes-nginx-ingress-controller-full-install-cloud.yaml) and [kubernetes-nginx-ingress-controller-full-install-baremetal.yaml](kubernetes-nginx-ingress-controller-full-install-baremetal.yaml)
 
@@ -68,7 +68,7 @@ ingressclass.networking.k8s.io/nginx created
 validatingwebhookconfiguration.admissionregistration.k8s.io/ingress-nginx-admission created
 ```
 
-We can review the workload resources created:
+We can now review the workload resources created:
 ```
 Chapter11$ kubectl get all -n ingress-nginx
 NAME                                            READY   STATUS      RESTARTS   AGE
@@ -687,7 +687,7 @@ strict-transport-security: max-age=15724800; includeSubDomains
 * Connection #0 to host localhost left intact
 ```
 
-As you can see, we obtained the Ingress Controller common Fake Certificate, included by default in the installation. Of course, this certificate can also be changed, but it will affect all yout Ingress without a specific certificate and its management will be part of the daily tasks of your Kubernetes platform administrators.
+As you can see, we obtained the Ingress Controller common Fake Certificate, included by default in the installation. Of course, this certificate can also be changed, but it will affect all your Ingress without a specific certificate and its management will be part of the daily tasks of your Kubernetes platform administrators.
 
 
 ---
@@ -922,7 +922,7 @@ We get a 504 error because our ___lb___ component doesn't have any EGRESS connec
 
 All the traffic between Pods in the ___simplestlab___ is forbiden, hence our application doesn't work. Internal communications are required.
 
-We should implement NetworkPolicy resources for each component, allowing only extrictly required communications, but sometimes we can grant namespaced access just to ensure everything works correctly.
+We should implement NetworkPolicy resources for each component, allowing only strictly required communications, but sometimes we can grant namespaced access just to ensure everything works correctly.
 
 We will now create a NetworkPolicy allowing all the internal traffic, between components running in ___simplestlab___ namespace:
 ```
@@ -1131,7 +1131,7 @@ disable-all-traffic       <none>                          47m
 
 The POD-SELECTOR columm shows which Pods will be affected by the NetworkPolicy. 
 
-Let's test now accesses from ___netools___ Pod:
+Let's test for accesses from ___netools___ Pod:
 
 ```
 Chapter11$ kubectl exec -ti nettools -- curl http://app.simplestlab.svc:3000 --connect-timeout 3 -I
