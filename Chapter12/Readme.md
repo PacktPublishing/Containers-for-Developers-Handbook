@@ -2,11 +2,11 @@
 
 ## __Technical requirements__
 
-The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use Docker Desktop as container runtime and WSL2 (or you Linux/MacOS terminal) to execute the commands described for the first part of the Labs (Ingress Controller) and then we will start a Minikube environment for the second part (NetworkPolicy resources).
+The following labs will provide practice examples for the concepts and procedures learned in this chapter. We will use Docker Desktop as container runtime and WSL2 (or you Linux/MacOS terminal) to execute the commands described for the first part of the Labs (Ingress Controller) and then we will start a Minikube environment for the second part (NetworkPolicy resources).
 
 >__IMPORTANT NOTE: Please stop Docker Desktop before creating your Minikube environemnt. Both can run at the same time but they will consume lot of hardware resources and you should choose the right Kubernetes context for your environment.__ 
 
-Ensure you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter12 directory. 
+Ensure that you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter12 directory. 
 
 You can use one of the following Kubernetes Desktop environments:
 - Docker Desktop (NetworkPolicy resources are not available at the time of writting this book in this platform)
@@ -31,7 +31,7 @@ Chapter12$ minikube delete
 💀  Removed all traces of the "minikube" cluster.
 ```
 
-We will start a Minikube environment with at least 6GB of memory and 2 CPUs. We added the ingres and metrics-server plugins. The Minikube environment will start with both preconfigured for us which really help us setting up a quick working desktop Kubernetes environment:
+We will start a Minikube environment with at least 6GB of memory and 2 CPUs. We added the ingres and metrics-server plugins. The Minikube environment will start with both preconfigured for us which will really help us to set up a quick working desktop Kubernetes environment:
 ```
 Chapter12$  minikube start --driver=hyperv --memory=6gb --cpus=2 --cni=calico --addons=ingress,metrics-server
 😄  minikube v1.30.1 on Microsoft Windows 10 Pro 10.0.19045.3208 Build 19045.3208
@@ -159,7 +159,7 @@ To deploy the stack we can use either the https://prometheus-community.github.io
 
 Helm charts can be customized by using --set argument to declare a new value for the variables included by default. We can use --set argument multiple times to include multiple values, but it may be too long and dificult to read. You will usually use a customized YAML values file which will overwrite the variable values included in the chart as values.yaml file.
 
-Let's take a look at the [kube-prometheus-stack.values.yaml](.kube-prometheus-stack.values.yaml) values file we will use to customize the kube-prometehus-stack environment:
+Let's take a look at the [kube-prometheus-stack.values.yaml](.kube-prometheus-stack.values.yaml) values file we will use to customize the kube-prometheus-stack environment:
 ```
 alertmanager:
   enabled: false
@@ -401,7 +401,7 @@ Take your time and review some of the deployed dashboards. You will learn a lot 
 
 We can use the Explore section (clicking on Explore button on the left main panel) to review the data retrieved from the configured datasources. This is usually the first point when we are trying to create a new dashboard.
 
-on the Explore section, we will choose __local-prometheus__ as datasource to access all the data from this Prometheus-type datasource. We can include multiples datasources from the same type and select the appropriate ones on each dashboard or Explorer query.
+on the Explore section, we will choose __local-prometheus__ as datasource to access all the data from this Prometheus-type datasource. We can also include multiples datasources from the same type and select the appropriate ones on each dashboard or Explorer query.
 
 ![Fig6](images/ch12-fig6.PNG)
 
@@ -409,7 +409,7 @@ Once the datasource is selected, we can review the metrics available by clicking
 
 >NOTE: Choose the appropriate time range. If you have just included a datasource, or exporter with new metrics, they may not be in the Metrics selection because of the time range choosen (top right menu).
 
-We have choosen for example the __container_cpu_usage_seconds_total__ metric  (you can write in the select box to search for metrics) and filter some specific labels such as the __namespace__, or even an specific __pod name__:
+We have choosen an example for this case, a __container_cpu_usage_seconds_total__ metric  (you can write in the select box to search for metrics) and filter some specific labels such as the __namespace__, or even an specific __pod name__:
 
 ![Fig7](images/ch12-fig7.PNG)
 
@@ -471,11 +471,11 @@ We changed the panel's titles and then save the dashboard as SimplestLab.
 
 ![Fig18](images/ch12-fig18.PNG)
 
-You finally have a very simple dashboard for your application, which can really help you to find any problem and allow you to have a clear idea of the limits required for your application's Pods.
+We finally have a very simple dashboard for your application, which can really help us to find any problems and allow us to have a clear idea of the limits required for your application's Pods.
 
 >NOTE: You may find a huge number of example dashboards at https://grafana.com/grafana/dashboards. Some of them can be used as they are, but others may need some small tweaks and customization to make them work on your environment.
 
->NOTE: You can import a copy of the SimplestLab dashboard from the __dashboards__ directory on this Labs. For this, you just use the Add button and clieck on Import. The following page will appear and you just have to upload the [./dashboards/SimplestLab.dashboard.json](./dashboards/SimplestLab.dashboard.json) file.
+>NOTE: You can import a copy of the SimplestLab dashboard from the __dashboards__ directory on this Labs. For this, you just use the Add button and click on Import. The following page will appear and you just have to upload the [./dashboards/SimplestLab.dashboard.json](./dashboards/SimplestLab.dashboard.json) file.
 >
 >![Fig19](images/ch12-fig19.PNG)
 
@@ -619,7 +619,7 @@ promhttp_metric_handler_requests_total{code="503"} 0
 command terminated with exit code 130
 ```
 
-But now we need a Service resource to export correctly the data into the Kubernetes cluster (we are not using any NetworkPolicy resource on these labs).
+But now we need a Service resource to correctly export data into the Kubernetes cluster (we are not using any NetworkPolicy resource on these labs).
 We add the new port to the existent db Service resource [./exporters/db.service-with-exporter.yaml](./exporters/db.service-with-exporter.yaml) :
 ```
 ...
@@ -779,7 +779,7 @@ spec:
       component: db
       app: simplestlab
 ```
-We defined in the ServiceMonitor which Service resources will be accessed (all the Services with ___component=db and app=simplestlab___ labels), in which port (___exporter => 9187___), which path to use to retrieve its metrics (___/metrics___). We now create this new resource:
+We have defined in the ServiceMonitor, which Service resources will be accessed (all the Services with ___component=db and app=simplestlab___ labels), in which port (___exporter => 9187___), which path to use to retrieve its metrics (___/metrics___). We now create this new resource:
 ```
 Chapter12$ kubectl create -f .\exporters\db.serviceMonitor.yaml
 servicemonitor.monitoring.coreos.com/db created
@@ -957,7 +957,7 @@ And now, in the __Graphs__ section, we can verify the Nginx Exporter metrics ava
 
 
 
-In these labs we learned to prepare a fully working monitoring and Logging environment, then create an application dashboard, with information from different sources, and finally, add new metrics using application's components exporters. You are now ready to even create your own application exporter (https://prometheus.io/docs/instrumenting/writing_exporters/). 
+In these labs we have learnt to prepare a fully working monitoring and Logging environment, then create an application dashboard, with information from different sources, and finally, add new metrics using application's components exporters. You are now ready to even create your own application exporter (https://prometheus.io/docs/instrumenting/writing_exporters/). 
 
 
 ## Remove the Minikube environment
