@@ -4,18 +4,18 @@
 
 The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use Docker Desktop as container runtime and WSL2 (or you Linux/MacOS terminal) to execute the commands described. 
 
-Ensure you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter9 directory. 
+Ensure that you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter9 directory. 
 
 You can use one of the following Kubernetes Desktop environments:
 - Docker Desktop
 - Rancher Desktop
 - Minikube
 - KinD
-The Labs will work on any of then, and of course, on any other Kubernetes environment. You may find issues with their defualt storage class, but there are some comments on the files that may be changed.
+The Labs will work on any of then, and of course, on any other Kubernetes environment. You may find issues with their default storage class, but there are some comments on the files that may be changed.
 
 ## Deploying the simplelab on Kubernetes
 
-In this lab we will deploy the simplelab, a very simplified tier-3 application (loadbalanccer could present additional static content but it is not added for the purposes of the labs).
+In this lab we will deploy the simplelab, a very simplified tier-3 application (load balancer could present additional static content but it is not added for the purposes of the labs).
 
 The application is composed of 3 components:
 - Postgres database - db component
@@ -24,11 +24,11 @@ The application is composed of 3 components:
 
 We have included in their manifests some of the mechanisms we learned in this chapter for checking the components health, replicating their processes and improve their security by disallowing their execution as root user, among other features.
 
-Let's start by revieweing and deploying the database component.
+Let's start by reviewing and deploying the database component.
 
 ### Database Component
 
-We will use a StatefulSet to ensure that replicating its processes (scaling up) will never represent a problem to our data. It is important to understand that a new replica starts empty, without data, and joins the pool of available endpoints for the service, which will probably be a problem. This means that in this conditions, the Postgres database isn't scalable, this component is deployed as StatefulSet to preserve its data even in the case of a manual replication. This example does only provide resilience, do not scale this component. If you need to deploy a database with high availability, you will need a distributed database like MongoDB.
+We will use a StatefulSet to ensure that replicating its processes (scaling up) will never represent a problem to our data. It is important to understand that a new replica starts empty, without data, and joins the pool of available endpoints for the service, which could probably become a problem. This means that in this condition, the Postgres database isn't scalable, this component is deployed as StatefulSet to preserve its data even in the case of a manual replication. This example does only provide resilience, do not scale this component. If you need to deploy a database with high availability, you will need a distributed database like MongoDB.
 
 This is its main manifest:
 ```
@@ -92,13 +92,13 @@ spec:
           storage: 1Gi
 ```
 
-We defined a template for the Pods to create and a separated template for the VolumeClaims (we will talk about them in chapter 10). This ensures that each Pod will get its own volume. The volume created, will be mounted in the database container as /data filesystem and its size will be 1000MB (1Gi). No other container is created.
+We have defined a template for the Pods to create and a separated template for the VolumeClaims (we will talk about them in chapter 10). This ensures that each Pod will get its own volume. The volume created, will be mounted in the database container as /data filesystem and its size will be 1000MB (1Gi). No other container is created.
 POSTGRES_PASSWORD and PGDATA environment variables are set and pased to the container. They will be used to create the password for the postgres user and the patch for the database data.
 The image used for the container is docker.io/frjaraur/simplestdb:1.0 and port 5432 will be used to expose its service. Pods only expose their services internally, in the Kubernetes network, hence you will never be able to reach these services from remote clients. 
-We speficied 1 replica and the controller will associate the pods to this StatefulSet by searching Pods wih  component=db and app=simplestlab labels.
-We simplified the database's probes by just checking a TCP connection to port 5432. 
+We have specified 1 replica and the controller will associate the pods to this StatefulSet by searching Pods wih  component=db and app=simplestlab labels.
+We have simplified the database's probes by just checking a TCP connection to port 5432. 
 
-We defined a security context at Pod's level, which will apply to all the containers by default:
+We have defined a security context at Pod's level, which will be applied to all the containers by default:
 ```
       securityContext:
         runAsNonRoot: true
@@ -107,9 +107,9 @@ We defined a security context at Pod's level, which will apply to all the contai
         fsGroup: 10000
         fsGroupChangePolicy: OnRootMismatch
 ```
-The database processes will run as 10000:10000 user:group, hence they are secure (no root is required). We could have gone further if we set the container as read-only but in this case we didn't as the Docker's official Postgres image; although it would have been better using a full read-only filesystem.
+The database processes will run as 10000:10000 user:group, hence they are secure (no root is required). We could have gone further if we set the container as read-only but in this case we didn't, as the Docker's official Postgres image; although it would have been better using a full read-only filesystem.
 
-The pod will get an IP address and this may change if Pod is recreated by any reasson, which makes Pods' IP addresses imposible to use in such dynamic environments. We will use a Service to associate a "fixed IP address" with a service and then with the endpoints of the Pods related to the Service.
+The pod will get an IP address and this may change if Pod is recreated by any reason, which makes Pods' IP addresses imposible to use in such dynamic environments. We will use a Service to associate a "fixed IP address" with a service and then with the endpoints of the Pods related to the Service.
 
 This is the definition for the service:
 ```
@@ -128,7 +128,7 @@ spec:
       targetPort: 5432
 ```
 
-The service is associated with the Pods by using a selector (components=db and app=simplestlab labels) and Kubernetes will route the traffic to appropriate Pods. When a TCP packet reaches Service's port 5432, it is load balanced to all the available Pod's endpoints (in this case we will just have one replica) in port 5432. We used in both cases port 5432, but you must understand that targetPort refers to the Container port, while port key refers to the Service's port, and they can be completely different.
+This service is associated with the Pods by using a selector (components=db and app=simplestlab labels) and Kubernetes will route the traffic to appropriate Pods. When a TCP packet reaches Service's port 5432, it is load balanced to all the available Pod's endpoints (in this case we will just have one replica) in port 5432. We used in both cases port 5432, but you must understand that targetPort refers to the Container port, while port key refers to the Service's port, and they can be completely different.
 We are using a headless Service because it works very well with StatefulSets and its resolution in round-robin mode
 
 With the StatefulSet definition and the Service we can deploy the databse component.
@@ -321,7 +321,7 @@ data:
 This configuration will allow us to run as user 101 (nginx). We create this configMap before the actual DaemonSet; although it is possible to do the opposite, it is important to understand the requirements and prepare them before the workload deployment. This configuration allows us to run Nginx as non-root on a port greater than 1024 (system ports). We will use 8080.
 
 Notice that we added a proxy_pass sentence for reouting the requests for / to http://app:3000, where app is the Service's name, resolved via internal DNS.
-We will use /healthz for checking the container healthiness.
+We will use /healthz for checking the container health.
 
 Let's review the DaemonSet manifest:
 ```
