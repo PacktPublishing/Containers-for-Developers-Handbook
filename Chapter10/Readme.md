@@ -2,9 +2,9 @@
 
 ## __Technical requirements__
 
-The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use Docker Desktop as container runtime and WSL2 (or you Linux/MacOS terminal) to execute the commands described. 
+The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use Docker Desktop as container runtime and WSL2 (or you Linux/MacOS terminal) to execute the commands as described. 
 
-Ensure you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter10 directory. 
+Ensure that you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter10 directory. 
 
 You can use one of the following Kubernetes Desktop environments:
 - Docker Desktop
@@ -21,7 +21,7 @@ The Labs will work on any of then, and of course, on any other Kubernetes enviro
 >- Rancher Desktop 
 >![AppGui](images/reset-rancher.PNG)
 >
->The Reset Kubernetes button, completely removes all the workloads and resources created, which is great to start things over. I really recommend reseting your cluster before starting this Labs section.
+>The Reset Kubernetes button, completely removes all the workloads and resources created, which is great to start things over. I highly recommend reseting your cluster before starting this Labs section.
 
 
 ## Improving the simplelab application on Kubernetes
@@ -33,11 +33,11 @@ The application is composed of 3 components:
 - Application backend in NodeJS - app component
 - Nginx fronted for static content - lb component
 
-We have included in their manifests some of the storage solutions learned in this chapter.
+We have included  some of the storage solutions in their manifests as we have learned in this chapter.
 
 ### Database Component
 
-As we are alredy using a StatefulSet, a PersistentVolumeClaim is configured, but the postgres user password was presented in the database container in clear text. We added a Secret resource to include this password, and we also included a complete database initialization script that will allow us to prepare the database. In the previous labs, this component was initialized with the script, included in the container image. In this case, we can manage how the database por the application will be created by modifying this sctipt and replacing the secret. You must to know that we can't use this mechanism to modify a previously initialized database. That's why we expect to deploy this component from scratch.
+As we are already used a StatefulSet, a PersistentVolumeClaim is configured, but the postgres user password was present in the database container in clear text. We have added a Secret resource to include this password, and we can also included a complete database initialization script that will allow us to prepare the database. In the previous labs, this component was initialized with the script, included in the container image. In this case, we can manage how the database for the application will be created by modifying this sctipt and replacing the secret. You must to know that we can't use this mechanism to modify a previously initialized database. That's why we can expect to deploy this component from scratch.
 
 These are the Secret manifests created:
 
@@ -185,7 +185,7 @@ service/db created
 ```
 The service wasn't modified at all.
 
-We check if the user was created by connecting to the database server and show its users:
+We can check if the user was created by connecting to the database server and show its users:
 ```
 $ kubectl exec -ti db-0 -- psql -U postgres
 psql (15.3)
@@ -248,7 +248,7 @@ We can now continue and review the changes in the app component.
 
 ### Application backend
 
-For this component we used the imperative method for creating the appcredentials Secret. This method does not generate a YAML manifest which may be a problem because you will ned to store ypu passwords somewhere. In you need to store all your manifest in yor code repository, which is always recommended, you must always encrypt your Secret manifests.
+For this component we have used the imperative method for creating the appcredentials Secret. This method does not generate a YAML manifest which may be a problem because you will need to store your passwords somewhere. In this case, you will need to store all your manifest in your code repository, which is always recommended, and you must always encrypt your Secret manifests.
 
 ```
 $ kubectl create secret generic appcredentials \
@@ -339,14 +339,14 @@ spec:
 ```
 
 We have just included all the required environment variables from the secret created before.
-We deploy the app menifests:
+We can now deploy the app menifests:
 ```
 $ kubectl create -f app.deployment.yaml -f app.service.yaml
 deployment.apps/app created
 service/app created
 ```
 
-We now verify the content included in the containers:
+We can now verify the content included in the containers:
 ```
 $ kubectl exec -ti app-5f9797d755-2bgtt -- env
 PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
@@ -423,7 +423,7 @@ data:
     }
 ```
 
-We deploy all the lb manifests:
+We can deploy all the lb manifests:
 ```
 $ kubectl create -f lb.daemonset.yaml -f lb.configmap.yaml -f  lb.service.yaml
 daemonset.apps/lb created
@@ -431,7 +431,7 @@ configmap/lb-config created
 service/lb create
 ```
 
-We review the status of all the application's components and the configuration applied to the Nginx component:
+We can review the status of all the application's components and the configuration applied to the Nginx component:
 ```
 
 $ kubectl get pods
@@ -504,7 +504,7 @@ kubernetes   ClusterIP   10.96.0.1       <none>        443/TCP        12d
 lb           NodePort    10.108.36.202   <none>        80:32000/TCP   4m24s
 ```
 
-We remove the old app service:
+Lets remove the old app service:
 ```
 $ kubectl delete svc app
 service "app" deleted
@@ -566,7 +566,7 @@ $ kubectl replace -f lb.configmap.for-app2-service.yaml
 configmap/lb-config replaced
 ```
 
-We verify if the new content is applied to the ConfigMap resource in Kubernetes:
+We can verify whether the new content is applied to the ConfigMap resource in Kubernetes:
 ```
 $ kubectl get cm lb-config -o yaml
 apiVersion: v1
@@ -616,7 +616,7 @@ http {
 }
 ```
 
-as you may have noticed, the file wasn't updated. This is due to the fact that we are using a subPath key to mount the ___nginx.conf___ file, hence the configMap isn't synced.
+As you may have noticed, the file wasn't updated. This is due to the fact that we are using a subPath key to mount the ___nginx.conf___ file, hence the configMap isn't synced.
 
 But we can now force the DaemonSet to update the values by removing the Pods: 
 ```
