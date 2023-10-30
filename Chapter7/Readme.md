@@ -1,6 +1,6 @@
 # Chapter 7 Labs 
 
-The following labs will help you deploy a simple demo application on top a Docker Swarm cluster to review the most important features provided by this container orchestrator. The code for the labs is available in this book’s Github repository in https://github.com/ PacktPublishing /Docker-for-Developers-Handbook.git. Ensure you have the latest revision available by simply executing git clone https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git to download all its content or git pull if you already downloaded the repository before. Additional labs are usually included in GitHub. 
+The following labs will help you deploy a simple demo application on top a Docker Swarm cluster to review the most important features provided by this container orchestrator. The code for the labs is available in this book’s Github repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. Ensure you have the latest revision available by simply executing git clone https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git to download all its content or git pull if you already downloaded the repository before. Additional labs are usually included in GitHub. 
 
 All commands and content used in these labs will be located inside Docker-for-Developers-Handbook/Chapter7 directory. 
 
@@ -173,7 +173,7 @@ overall progress: 3 out of 3 tasks
 
 3/3: running   [==================================================>] 
 ```
-We review the service’s status again and we notice that the instances were recreated: 
+We will review the service’s status again and we can notice that the instances are recreated: 
 ```
 $ docker service ps webserver 
 
@@ -192,7 +192,7 @@ j0at9tnwc3tx    \_ webserver.2   nginx:alpine   docker-desktop   Shutdown       
 vj6k8cuf0rix    \_ webserver.3   nginx:alpine   docker-desktop   Shutdown        Shutdown 38 seconds ago 
 ```
 
-7 - We list which port was chosen (we didn’t specify any port for the service hence port 80 was assigned to a random host port). 
+7 - We can list which port was chosen (we didn’t specify any port for the service hence port 80 was assigned to a random host port). 
 ```
 $ docker service ls 
 
@@ -248,7 +248,7 @@ We will now run a simple application using a compose YAML file.
 
 In this lab we will run a complete application using a stack object. Take a good look to the YAML file that we will use to deploy our application. 
 
-1 - We first create a couple of secret objects we will use in the stack: 
+1 - We will first create a couple of secret objects that we will use in the stack: 
 ```
 $ echo demo|docker secret create dbpasswd.env - 
 
@@ -260,9 +260,9 @@ $ docker secret create dbconfig.json dbconfig.json
 xx0pesu1tl9bvexk6dfs8xspx 
 ```
 
-We used echo for the first one to include only the string inside the dbpasswd.env secret while we included a complete JSON file in the dbconfig.json secret. These secret names can be changed because we will use the full format for reference them in the compose file. 
+We have used echo for the first one to include only the string inside the dbpasswd.env secret while we have included a complete JSON file in the dbconfig.json secret. These secret names can be changed because we will use the full format for referencing them in the compose file. 
 
-2 - To create an initial database with our own data structure we adda new config, init-demo.sh to overwrite the file included in the image: 
+2 - To create an initial database with our own data structure we add a new config, init-demo.sh to overwrite the file included in the image: 
 ```
 $ docker config create init-demo.sh init-demo.sh 
 
@@ -367,11 +367,11 @@ secrets:
     external: true 
 ```
 
-You may notice that all secrets and configs are defined as external resources. This allows us to create them outside of the stack. It is not a good idea to include the secrets’ sensitive content in clear in your compde YAML files. 
+You may notice that all secrets and configs are defined as external resources. This will allow us to create them outside of the stack. It is not a good idea to include the secret's sensitive content in clear in your compose YAML files. 
 
 >Important Note 
 >
->We haven’t use a netwrok volume because we are using a single node cluster, hence it isn’t needed, but if you plan to deploy more nodes in your cluster you must prepare either a network storage or a cluster wide synchronization solution to ensure the data is available wherever the database component is running. Otherwise, your database server won’t be able to start correctly. 
+>We haven’t used a network volume because we are using a single node cluster here, hence it isn’t needed, but if you plan to deploy more nodes in your cluster you must prepare either a network storage or a cluster wide synchronization solution to ensure the data is available wherever the database component is running. Otherwise, your database server won’t be able to start correctly. 
 
 4 - Now we can deploy the compose YAML as a Docker stack: 
 ```
