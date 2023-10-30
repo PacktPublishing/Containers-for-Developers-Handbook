@@ -9,7 +9,7 @@ All commands and content used in these labs will be located inside Docker-for-De
 ## Deploying a simple demo application
 
 In this lab we will learn how to deploy an application with 3 components: a load balancer, a frontend and a database.
-There are hundred of good docker compose examples and in fact there are many vendors who provide their applications packaged in compose YAML format even for production. We choose this pretty simple application because we are focused in the Docker command-line and not in the application itself.
+There are hundreds of good docker compose examples and in fact there are many vendors who provide their applications packaged in compose YAML format even for production. We choose this pretty simple application because we are focused in the Docker command-line and not in the application itself.
 
 If you list the content of the Chapter5 folder you will see a forlder containing this simplestapp. There is a folder for each component and a couple of compose files that will allow us deploy the full application.
 The compose YAML file that defines our application contains the following code:
@@ -68,7 +68,7 @@ networks:
 
 ```
 
-Only one volume will be used, for the database component. The only service published is the load balancer. We included this service just to let you understand how we can integrate a multilayer application and only share one visible component.  
+Only one volume will be used, for the database component. The only service published is the load balancer. We have included this service just to let you have an understanding of how we can integrate a multilayer application and only share one visible component.  
 
 
 Images will be created locally (you may want to upload to your own registry or DockerHub account).
@@ -161,7 +161,7 @@ $ docker-compose --file simplestlab/docker-compose.yaml --project-name chapter5 
  => => naming to docker.io/myregistry/simplest-lab:simplestapp                                                     0.0s
 ```
 
-We could have used directly docker-compose run to build or pull the images and run all containers, but this way we can review the process step by step.
+We could have  directly used docker-compose run to build or pull the images and run all containers, but this way we can review the process step by step.
 
 2 - We can take a look at the images created locally.
 ```
@@ -171,7 +171,7 @@ myregistry/simplest-lab   simplestapp   2d88460e20ca   8 minutes ago   73.5MB
 myregistry/simplest-lab   simplestdb    e872ee4e9593   8 minutes ago   243MB
 myregistry/simplest-lab   simplestlb    bab86a191910   8 minutes ago   8.51MB
 ```
-As you may notice all the images created follow the names defined in the compose YAML file. Because build key exists, build process is executed instead of pulling images directly.
+As you may have noticed all the images created follow the names defined in the compose YAML file. Because build key exists, build process is executed instead of pulling images directly.
 
 3 - Let's now create the container for the database service.
 ```
@@ -183,7 +183,7 @@ $ docker-compose --file simplestlab/docker-compose.yaml --project-name chapter5 
 ```
 All the objects required for the database service were created. It is not running yet, but it is ready for that.
 
-4 - We run this service alone and revew its status.
+4 - We run this service alone and review its status.
 ```
 $ docker-compose --file simplestlab/docker-compose.yaml --project-name chapter5 up -d db
 [+] Running 1/1
