@@ -434,7 +434,7 @@ With this simple example of usual problems you may find while preparing your app
 ## Removing all projects 
 
 1 – We will remove all the deployed projects by using docker-compose down. 
-
+```
 $ docker-compose -f  /home/frjaraur/labs/Chapter5/simplestlab/docker-compose.yaml --project-name chapter5 down 
 
 WARN[0000] The "LB_PORT" variable is not set. Defaulting to a blank string. 
@@ -450,9 +450,9 @@ WARN[0000] The "LB_PORT" variable is not set. Defaulting to a blank string.
 ⠿ Container chapter5-lb-1       Removed                                                                           0.1s 
 
 ⠿ Network chapter5_simplestlab  Removed                                                                           0.6s 
-
+```
 You may notice that volumes are not listed as removed. We can review the current volumes on your system. 
-
+```
 $ docker volume ls 
 
 DRIVER    VOLUME NAME 
@@ -460,9 +460,9 @@ DRIVER    VOLUME NAME
 local     chapter5_pgdata 
 
 local     newdemo_pgdata 
-
+```
 We will remove manually the volume present for project chapter5, but we will use the --volumes argument for removing all the volumes associated with a project. 
-
+```
  $ docker-compose -f  /home/frjaraur/labs/Chapter5/simplestlab/docker-compose.yaml --project-name newdemo down --volumes 
 
 WARN[0000] The "LB_PORT" variable is not set. Defaulting to a blank string. 
@@ -478,9 +478,9 @@ WARN[0000] The "LB_PORT" variable is not set. Defaulting to a blank string.
 ⠿ Volume newdemo_pgdata        Removed                                                                            0.1s 
 
 ⠿ Network newdemo_simplestlab  Removed                                                                            0.6s 
-
+```
 Volume was removed as we can verify now. 
-
+```
 $ docker volume ls 
 
 DRIVER    VOLUME NAME 
@@ -492,7 +492,7 @@ Therefore, we remove it manually.
 $ docker volume rm  chapter5_pgdata 
 
 chapter5_pgdata 
-
+```
 
 
 
