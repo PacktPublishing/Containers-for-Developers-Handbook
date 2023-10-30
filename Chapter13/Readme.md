@@ -2,13 +2,13 @@
 
 ## __Technical requirements__
 
-The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use Minikube on docker (--driver=Docker). You can use other Kubernetes implementations because we are going to use Kubernetes standar commands, available on any moder Kubernetes version (1.20+). We decided to use Minikube on Docker because this version allows us to fix the IP address used for the Minikube Host (in this case executed as a container). The lab will give you a good idea of CI/CD practices with the modern GitOps model by creating a fully functional CI/CD environment using GitLab and ArgoCD. We will separate the labs in different sections to help you follow the required steps. 
+The following labs will provide examples to put into practice concepts and procedures learned in this chapter. We will use Minikube on docker (--driver=docker). You can use other Kubernetes implementations because we are going to use Kubernetes standar commands, available on any moder Kubernetes version (1.20+). We have decided to use Minikube on Docker because this version allows us to fix the IP address used for the Minikube Host (in this case executed as a container). The lab will give you a good idea of CI/CD practices with the modern GitOps model by creating a fully functional CI/CD environment using GitLab and ArgoCD. We will separate the labs in different sections to help you follow the required steps. 
 
-I will use my Linux desktop, but I will give you equivalent Powershell commands in case you use Microsfot Windows as your base operating system, although sometimes is even easier to open a WSL2 console on your Windows host and execute commands like __openssl__ or __base64__.
+I will use my Linux desktop, but I will give you equivalent Powershell commands in case you use Microsoft Windows as your base operating system, although sometimes it is even easier to open a WSL2 console on your Windows host and execute commands like __openssl__ or __base64__.
 
 >__IMPORTANT NOTE: Please stop Docker Desktop before creating your Minikube environemnt. Both can run at the same time but they will consume lot of hardware resources and you should choose the right Kubernetes context for your environment.__ 
 
-Ensure you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter13 directory. 
+Ensure that you have downloaded the content of this book’s GitHub repository in https://github.com/PacktPublishing/Docker-for-Developers-Handbook.git. For this chapter’s labs we will use the content of Chapter13 directory. 
 
 You can use one of the following Kubernetes Desktop environments:
 - Docker Desktop (NetworkPolicy resources are not available at the time of writting this book in this platform)
@@ -479,7 +479,7 @@ We have prepared for you a script that generates a valid values YAML file for th
 >X7LTPHXP84yGqwGOZIejLw==
 >-----END CERTIFICATE-----
 >```
->Identation in YAML files is key. If you prepare the minikube_install_values.yaml manually, be very careful with the identation once you include your GitLab CA.
+>Identation in YAML files is key. If you have prepared the minikube_install_values.yaml manually, be very careful with the identation once you include your GitLab CA.
 
 - Linux
 ```
@@ -528,7 +528,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 ```
 
 
-We quiclky take a look at the Ingress generated:
+We can quiclky take a look at the Ingress generated:
 ```
 Chapter13$ kubectl get ingress -n argocd
 NAME            CLASS   HOSTS                          ADDRESS          PORTS   AGE
@@ -536,7 +536,7 @@ argocd-server   nginx   argocd.172.31.255.254.nip.io   172.31.255.254   80      
 
 ```
 
-Now retrieve the admin password from the ___argocd-initial-admin-secret___:
+Lets retrieve the admin password from the ___argocd-initial-admin-secret___:
 
 - Windows
 ```
@@ -614,7 +614,7 @@ email: coder@labs.local
 ![ch13-7](./readme_images/ch13-7.png)
 
 
-7 - We will create ___Code___, ___HelmCharts___, ___Values___ and ___Images___ subgroups inside the ___SimplestLab___ group. We have simplified the full process for a quick demo environment and used only one project for the code, we will just include the ___App___ component of the application. All other images will be used already built (Postgres Database and Nginx Loadbalancer). 
+7 - We will create ___Code___, ___HelmCharts___, ___Values___ and ___Images___ subgroups inside the ___SimplestLab___ group. We have simplified the full process for a quick demo environment and used only one project for the code, we will just include the ___App___ component of the application. All other images  used are already built (Postgres Database and Nginx Loadbalancer). 
 This subgroup will be Private.
 
 ![ch13-8](./readme_images/ch13-8.png)
@@ -858,7 +858,7 @@ This file includes the following sections:
 >    kubectl get secret -n gitlab -o yaml gitlab-wildcard-tls-chain -o jsonpath='{.data.gitlab\.172\.31\.255\.254\.nip\.io\.crt}'
 >    ```
 >
->They should be created at group level, in the SimplestLab main group (Settings>CI/CD>Variables). This will ensure they are used in all the contained projects. Do not mark the __'Protected'__ checkbox as we will not use any of these variables on protected repositories. Just check ___Masked___ on the user password variable and leave others emtpy for all the variables.
+>They should be created at group level, in the SimplestLab main group (Settings>CI/CD>Variables). This will ensure they are used in all the contained projects. Do not mark the __'Protected'__ checkbox as we will not use any of these variables on protected repositories. Just check ___Masked___ on the user password variable and leave others empty for all the variables.
 >
 >Following screenshot shows the final situation, when all are created:
 >
@@ -879,7 +879,7 @@ In this repository different actions may be triggered:
     validate-dockerfile ---> trivy-scan ---> build-release (RELEASE container image)
 ```
 
-We have separated in two different registry repositories the different images created. This way we can provide different accesses (in this example only the __coder__ user is able to push and pull inside the Code subgroup). This is just an example, you will never allow to publicly push images to a release repository, but we showed you how to manage images in different repositories for different purposes. 
+We have separated in two different registry repositories the different images created. This way we can provide different accesses (in this example only the __coder__ user is able to push and pull inside the Code subgroup). This is just an example, you will never be allowed to publicly push images to a release repository, but we showed have you how to manage images in different repositories for different purposes. 
 
 
 Execute some small and traceable code changes and verify how the pipelines work.
@@ -1450,7 +1450,7 @@ Chapter13$ argocd login --insecure --username admin --password QDKoHBovDxdO0rt1 
 Context 'argocd.172.31.255.254.nip.io' updated
 ```
 
-We have just connected the cluster, but we need to really integrate the cluster. I prefer to add a new cluster to ensure all integration requirements are automatically create by ArgoCD, hence we add minikube cluster using --in-cluster to make ArgoCD integrate the its own cluster (where it is running) using internal Kubernetes API service (__kubernetes.defaul.svc__):
+We have just connected the cluster, but we need to really integrate the cluster. I prefer adding a new cluster to ensure all integration requirements are automatically created by ArgoCD, hence we add minikube cluster using --in-cluster to make ArgoCD integrate the its own cluster (where it is running) using internal Kubernetes API service (__kubernetes.defaul.svc__):
 ```
 Chapter13$ argocd cluster add  minikube --name minikube --in-cluster 
 
@@ -1527,7 +1527,7 @@ spec:
     targetRevision: main
 ```
 
-A copy of this faile is included in the Chapter13/ArgoCD/Applications directory, [minikube-simplestlab.yaml](ArgoCD/Applications/minikube-simplestlab.yam).
+A copy of this YAML is included in the Chapter13/ArgoCD/Applications directory, [minikube-simplestlab.yaml](ArgoCD/Applications/minikube-simplestlab.yam).
 
 In this YAML file we declare:
 - __destination__:
@@ -1741,9 +1741,9 @@ The ArgoCD shows the application __Healthy__ and __Synced__.
 
 
 
-This ws the last step on this long lab. You can make changes to either your configurations, code or Helm Charts and trigger the pipelines or GitOps integration to manage your application status and behavior.
+This is the last step on this long lab. You can make changes to either your configurations, code or Helm Charts and trigger the pipelines or GitOps integration to manage your application status and behavior.
 
-We can't explain you in a lab all the configurations we have done to make all the workflow work, we gave you the tips and you can deep dive by your self exploring the already prepared configuration and script steps done.
+We can't explain  all the configurations in this lab as we have done to make all the workflow work, we gave you all the tips and you can deep dive by yourself exploring the already prepared configuration and script steps.
 
 It would be nice to follow the lab by including now the NetworkPolicy resources created in Chapter 11 and the Nginx and Postgres Prometheus exporters prepared in Chapter 12.
 
