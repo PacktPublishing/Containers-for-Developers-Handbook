@@ -143,7 +143,7 @@ j0at9tnwc3tx   webserver.2   nginx:alpine   docker-desktop   Running         Run
 vj6k8cuf0rix   webserver.3   nginx:alpine   docker-desktop   Running         Running 4 minutes ago 
 ```
 
-5 - Each container gets its own IP address and we will reach each one when we publish the service. We verify that all containers started correctly by reviewing ther service’s logs: 
+5 - Each container gets its own IP address and we will reach each one when we publish the service. We verify that all containers started correctly by reviewing their service’s logs: 
 ```
 $ docker service logs webserver --tail 2 
 
