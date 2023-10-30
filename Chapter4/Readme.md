@@ -197,7 +197,7 @@ We finally remove the second webserver:
 $ docker container rm -fv webserver2 
 webserver2 
 ```
-Notice that we used --fv argument to force remove the container (stop it if it was running) and the associated volumes (in this case we used a bind mount which will never be removed by the container runtime, so don’t worry about this type of mounts).  We will also launch our webserver by using the extended mount definition just to understand its usage: 
+Notice that we used -fv argument to force remove the container (stop it if it was running) and the associated volumes (in this case we used a bind mount which will never be removed by the container runtime, so don’t worry about this type of mounts).  We will also launch our webserver by using the extended mount definition just to understand its usage: 
 ```
 $ docker container run -d --net testnet –name webserver \ 
 --mount type=bind,source=$(pwd)/data,target=/usr/share/nginx/html \ 
