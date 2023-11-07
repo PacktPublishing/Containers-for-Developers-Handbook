@@ -69,11 +69,8 @@ With the following software and hardware list you can run all code files present
 **Francisco Javier Ramírez Urea**
 has been working in the IT industry since 1999 after receiving his bachelor’s degree in physical sciences. He worked as a systems administrator for years before specializing in the monitoring of networking devices, operating systems, and applications. In 2015, he started working with software container technologies as an application architecture consultant and has developed his career and evolved with these technologies ever since. He became a Docker Captain in 2018 alongside being a Docker and Kubernetes teacher with various certifications (CKA, CKS, Docker DCA and MTA, and RedHat RHCE/RHCSA). He currently works at the European Union Satellite Centre as a SecDevOps officer.
 
-## Other books by the authors
+## Other books by the author
 * Building and Delivering Microservices on AWS [Packt](https://www.packtpub.com/product/docker-certified-associate-dca-exam-guide/9781839211898)
 
-
-## Other books by the authors
-* Building and Delivering Microservices on AWS [Packt](https://www.packtpub.com/product/docker-certified-associate-dca-exam-guide/9781839211898)
 
 
