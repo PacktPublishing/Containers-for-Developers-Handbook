@@ -1,3 +1,6 @@
+
+<b><p align='center'>[![Packt Sale](https://static.packt-cdn.com/assets/images/image.jpeg)](https://www.packtpub.com/)</p></b>Get this book on sale at [Packt](https://www.packtpub.com/).
+
 # Containers for Developers Handbook 
 
 <a href="https://www.packtpub.com/product/containers-for-developers-handbook/9781805127987?utm_source=github&utm_medium=repository&utm_campaign=9781786461629"><img src="https://github.com/PacktPublishing/Containers-for-Developers-Handbook/blob/main/Tools/Cover.jpg" alt="" height="256px" align="right"></a>
